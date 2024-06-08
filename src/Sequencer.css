@@ -4,6 +4,19 @@ body {
     text-align: center;
   }
   
+  .custom-logo {
+    width: 100%; /* Adjust width to ensure it doesn't stretch too much */
+    max-width: 400px; /* Maximum width to fit the layout */
+    height: auto; /* Maintain aspect ratio */
+    object-fit: contain; /* Ensure the image is fully visible */
+    margin: 20px auto;
+    transition: filter 0.1s all; /* Smooth transition for hover effect */
+  }
+  
+  .custom-logo:hover {
+    filter: invert(100%); /* Invert colors on hover */
+  }
+  
   .sequencer {
     display: flex;
     justify-content: center;
@@ -20,11 +33,11 @@ body {
   }
   
   .step.active {
-    background-color: #8f8;
+    background-color: #555;
   }
   
   .step.current {
-    border-color: red;
+    border-color: black;
   }
   
   .group {
@@ -83,7 +96,7 @@ body {
   }
   
   .tap-bpm .tap-value {
-    color: #333;
+    color: #000000;
   }
   
   .tap-bpm button {

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as Tone from 'tone';
 import './Sequencer.css';
 
+
 const Sequencer = () => {
   const steps = 16;
   const [stepData, setStepData] = useState(Array(steps).fill(false));
@@ -157,7 +158,7 @@ const Sequencer = () => {
 
   return (
     <div>
-      <h1>yuvdaw</h1>
+      <img src="/yuvdaw.jpg" alt="yuvdaw" className='custom-logo'/>
       {renderStepGroups(stepData, 'snare')}
       {renderStepGroups(tomData, 'tom')}
       <div className="controls">
