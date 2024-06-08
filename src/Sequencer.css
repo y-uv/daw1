@@ -1,0 +1,69 @@
+/* src/Sequencer.css */
+body {
+    font-family: monospace;
+    text-align: center;
+  }
+  
+  .sequencer {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  
+  .step {
+    width: 30px;
+    height: 30px;
+    margin: 2px;
+    background-color: #ddd;
+    border: 1px solid #aaa;
+    display: inline-block;
+  }
+  
+  .step.active {
+    background-color: #8f8;
+  }
+  
+  .step.current {
+    border-color: red;
+  }
+  
+  .group {
+    display: flex;
+  }
+  
+  .group + .group {
+    margin-left: 10px; /* Add spacing between groups */
+  }
+  
+  .controls {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 10px auto;
+  }
+  
+  .control-button {
+    margin-right: 20px;
+    cursor: pointer;
+  }
+  
+  .control-button i {
+    font-size: 24px;
+  }
+  
+  .bpm-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+  }
+  
+  .bpm-control label,
+  .bpm-control span {
+    margin: 0 5px;
+  }
+  
+  .bpm-control input[type="range"] {
+    margin: 0 10px;
+  }
+  
