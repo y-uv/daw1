@@ -10,6 +10,10 @@ const Sequencer = () => {
   const [bpm, setBpm] = useState(120);
   const [currentStep, setCurrentStep] = useState(0);
 
+  const [tapTimes, setTapTimes] = useState([]);
+  const [tapBpm, setTapBpm] = useState(null);
+  const tapTimeoutRef = useRef(null);
+
   // Load the snare and tom sounds
   const snarePlayer = useRef(null);
   const tomPlayer = useRef(null);
@@ -39,12 +43,52 @@ const Sequencer = () => {
       setCurrentStep(step);
     }, Array.from({ length: steps }, (_, i) => i), '16n').start(0);
 
-    Tone.Transport.bpm.value = bpm; //Needs to be Transport?    
+    Tone.Transport.bpm.value = bpm;
 
     return () => {
       sequence.dispose();
     };
   }, [stepData, tomData, bpm]);
+
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (event.key.toLowerCase() === 'k') {
+        const now = Date.now();
+        setTapTimes((prevTapTimes) => {
+          const newTapTimes = [...prevTapTimes, now];
+          if (newTapTimes.length > 1) {
+            const intervals = newTapTimes.slice(1).map((time, i) => time - newTapTimes[i]);
+            const avgInterval = intervals.reduce((acc, curr) => acc + curr, 0) / intervals.length;
+            const newBpm = 60000 / avgInterval;
+            setTapBpm(newBpm.toFixed(2));
+          }
+          if (newTapTimes.length > 30) {
+            newTapTimes.shift();
+          }
+          resetTapTimeout();
+          return newTapTimes;
+        });
+      }
+    };
+
+    window.addEventListener('keypress', handleKeyPress);
+
+    return () => {
+      window.removeEventListener('keypress', handleKeyPress);
+    };
+  }, []);
+
+  const resetTapTimeout = () => {
+    if (tapTimeoutRef.current) {
+      clearTimeout(tapTimeoutRef.current);
+    }
+    tapTimeoutRef.current = setTimeout(resetTapBpm, 3000);
+  };
+
+  const resetTapBpm = () => {
+    setTapTimes([]);
+    setTapBpm(null);
+  };
 
   const toggleStep = (step, row) => {
     if (row === 'snare') {
@@ -125,7 +169,7 @@ const Sequencer = () => {
         </div>
       </div>
       <div className="bpm-control">
-        <label htmlFor="bpm">BPM:</label>
+        <label htmlFor="bpm">bpm:</label>
         <input
           type="range"
           id="bpm"
@@ -135,6 +179,11 @@ const Sequencer = () => {
           onChange={handleBpmChange}
         />
         <span>{bpm}</span>
+      </div>
+      <div className="tap-bpm">
+        <button onClick={resetTapBpm}>reset</button>
+        <label>(tap k)</label>
+        <span className="tap-value">{tapBpm !== null ? tapBpm : '???'}</span>
       </div>
     </div>
   );
