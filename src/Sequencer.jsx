@@ -24,7 +24,7 @@ const Sequencer = () => {
 
   useEffect(() => {
     if (snarePlayer.current === null) {
-      const player = new Tone.Player('/snare.mp3').toDestination();
+      const player = new Tone.Player('/snap.mp3').toDestination();
       player.volume.value = snareVolume;
       player.autostart = false;
       snarePlayer.current = player;
@@ -32,7 +32,7 @@ const Sequencer = () => {
     }
 
     if (tomPlayer.current === null) {
-      const player = new Tone.Player('/tom.mp3').toDestination();
+      const player = new Tone.Player('/stomp.mp3').toDestination();
       player.volume.value = kickVolume;
       player.autostart = false;
       tomPlayer.current = player;
