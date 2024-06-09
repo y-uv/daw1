@@ -142,16 +142,23 @@ const Sequencer = () => {
     setCurrentStep(0);
   };
 
+  const constrainBpm = (value) => {
+    return Math.max(80, Math.min(200, value));
+  };
+
+  useEffect(() => {
+    const constrainedBpm = constrainBpm(bpm);
+    Tone.Transport.bpm.value = constrainedBpm;
+    updateSliderColor(constrainedBpm); // Update slider color based on constrained BPM
+  }, [bpm]);
+
   const handleBpmChange = (event) => {
     const newBpm = parseInt(event.target.value);
-    setBpm(newBpm);
-    Tone.Transport.bpm.value = newBpm;
-    updateSliderColor(newBpm);
+    setBpm(constrainBpm(newBpm));
   };
 
   const handleBpmInputChange = (event) => {
-    const newBpm = event.target.value;
-    setBpm(newBpm);
+    setBpm(event.target.value);
   };
 
   const handleBpmInputBlur = (event) => {
@@ -162,8 +169,13 @@ const Sequencer = () => {
       newBpm = 200;
     }
     setBpm(newBpm);
-    Tone.Transport.bpm.value = newBpm;
-    updateSliderColor(newBpm);
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      let newBpm = parseInt(event.target.value);
+      setBpm(constrainBpm(newBpm));
+    }
   };
 
   const updateSliderColor = (value) => {
@@ -254,6 +266,7 @@ const Sequencer = () => {
           value={bpm}
           onChange={handleBpmInputChange}
           onBlur={handleBpmInputBlur}
+          onKeyDown={handleKeyDown}
           className="bpm-input" /* [NEW] Add class for styling */
         />
       </div>
