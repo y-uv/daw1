@@ -10,7 +10,7 @@ body {
   object-fit: contain;
   margin: auto;
   transition: filter 0.1s all;
-  padding-left: 46px;
+  padding-left: 60px;
 }
 
 .custom-logo:hover {
@@ -30,7 +30,7 @@ body {
   flex-direction: column;
   align-items: flex-end;
   justify-content: space-between;
-  margin-top: 16px;
+  margin-top: 24px;
 }
 
 .label {
@@ -48,6 +48,50 @@ body {
   background-color: #f0f0f0; /* Light gray background for sequencer container */
   padding: 10px;
   border-radius: 8px;
+}
+
+.volume-container { /* [NEW] Container for volume dials */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: 18px;
+  padding-right: 12px;
+}
+
+.volume-dial { /* [CHANGED] Style for volume dials */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  writing-mode: vertical-lr; /* [NEW] Writing mode for vertical slider */
+  direction: rtl; /* [NEW] Direction for vertical slider */
+  width: 3px; /* Adjust width as needed */
+  height: 30px; /* Adjust height as needed */
+  background: black; /* Set background color to black */
+  margin-top: 14px; /* Add right padding */
+  
+  
+  border-radius: 5px; /* Optional: Add border radius for rounded edges */
+}
+
+.volume-dial::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: white;
+  border: 1px solid black;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.volume-dial::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: white;
+  border: 1px solid black;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 .sequencer {
@@ -117,7 +161,7 @@ body {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  padding-left: 65px;
+  padding-left: 74px;
 }
 
 .control-button {

@@ -18,9 +18,14 @@ const Sequencer = () => {
   const tomPlayer = useRef(null);
   const hatPlayer = useRef(null);
 
+  const [hatVolume, setHatVolume] = useState(-16);
+  const [snareVolume, setSnareVolume] = useState(-16);
+  const [kickVolume, setKickVolume] = useState(-16);
+
   useEffect(() => {
     if (snarePlayer.current === null) {
       const player = new Tone.Player('/snare.mp3').toDestination();
+      player.volume.value = snareVolume;
       player.autostart = false;
       snarePlayer.current = player;
       console.log('Snare player initialized:', snarePlayer.current);
@@ -28,6 +33,7 @@ const Sequencer = () => {
 
     if (tomPlayer.current === null) {
       const player = new Tone.Player('/tom.mp3').toDestination();
+      player.volume.value = kickVolume;
       player.autostart = false;
       tomPlayer.current = player;
       console.log('Tom player initialized:', tomPlayer.current);
@@ -35,6 +41,7 @@ const Sequencer = () => {
 
     if (hatPlayer.current === null) {
       const player = new Tone.Player('/hat.mp3').toDestination();
+      player.volume.value = hatVolume;
       player.autostart = false;
       hatPlayer.current = player;
       console.log('Hat player initialized:', hatPlayer.current);
@@ -58,7 +65,7 @@ const Sequencer = () => {
     return () => {
       sequence.dispose();
     };
-  }, [stepData, tomData, hatData, bpm]);
+  }, [stepData, tomData, hatData, bpm, snareVolume, kickVolume, hatVolume]);
 
   useEffect(() => {
     const handleKeyPress = (event) => {
@@ -152,6 +159,24 @@ const Sequencer = () => {
     updateSliderColor(constrainedBpm); // Update slider color based on constrained BPM
   }, [bpm]);
 
+  useEffect(() => {
+    if (hatPlayer.current) {
+      hatPlayer.current.volume.value = hatVolume;
+    }
+  }, [hatVolume]);
+
+  useEffect(() => {
+    if (snarePlayer.current) {
+      snarePlayer.current.volume.value = snareVolume;
+    }
+  }, [snareVolume]);
+
+  useEffect(() => {
+    if (tomPlayer.current) {
+      tomPlayer.current.volume.value = kickVolume;
+    }
+  }, [kickVolume]);
+
   const sanitizeBpmInput = (input) => {
     let sanitizedInput = input.replace(/[^0-9]/g, ''); // Remove non-numeric characters
     if (sanitizedInput === '') {
@@ -228,6 +253,37 @@ const Sequencer = () => {
   
     return <div className="dot-row">{groups}</div>;
   };
+
+  const renderVolumeDials = () => {
+    return (
+      <div className="volume-container">
+        <input
+          type="range"
+          min="-42"
+          max="-12"
+          value={hatVolume}
+          onChange={(e) => setHatVolume(e.target.value)}
+          className="volume-dial"
+        />
+        <input
+          type="range"
+          min="-42"
+          max="-12"
+          value={snareVolume}
+          onChange={(e) => setSnareVolume(e.target.value)}
+          className="volume-dial"
+        />
+        <input
+          type="range"
+          min="-42"
+          max="-12"
+          value={kickVolume}
+          onChange={(e) => setKickVolume(e.target.value)}
+          className="volume-dial"
+        />
+      </div>
+    );
+  };
   
   return (
     <div>
@@ -238,6 +294,7 @@ const Sequencer = () => {
           <div className="label">snare</div>
           <div className="label">kick</div>
         </div>
+        {renderVolumeDials()}
         <div className="sequencer-container">
           {renderDotRow()}
           {renderStepGroups(hatData, 'hat')}
