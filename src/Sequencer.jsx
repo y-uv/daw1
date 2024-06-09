@@ -152,6 +152,14 @@ const Sequencer = () => {
     updateSliderColor(constrainedBpm); // Update slider color based on constrained BPM
   }, [bpm]);
 
+  const sanitizeBpmInput = (input) => {
+    let sanitizedInput = input.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+    if (sanitizedInput === '') {
+      sanitizedInput = '80'; // Set to minimum value if input is empty
+    }
+    return constrainBpm(parseInt(sanitizedInput));
+  };
+
   const handleBpmChange = (event) => {
     const newBpm = parseInt(event.target.value);
     setBpm(constrainBpm(newBpm));
@@ -162,19 +170,14 @@ const Sequencer = () => {
   };
 
   const handleBpmInputBlur = (event) => {
-    let newBpm = parseInt(event.target.value);
-    if (isNaN(newBpm) || newBpm < 80) {
-      newBpm = 80;
-    } else if (newBpm > 200) {
-      newBpm = 200;
-    }
+    const newBpm = sanitizeBpmInput(event.target.value);
     setBpm(newBpm);
   };
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
-      let newBpm = parseInt(event.target.value);
-      setBpm(constrainBpm(newBpm));
+      const newBpm = sanitizeBpmInput(event.target.value);
+      setBpm(newBpm);
     }
   };
 
@@ -183,7 +186,9 @@ const Sequencer = () => {
     const red = Math.round(255 * percentage);
     const blue = 255 - red;
     const slider = document.getElementById('bpm');
-    slider.style.background = `rgb(${red}, 0, ${blue})`;
+    if (slider) {
+      slider.style.background = `rgb(${red}, 0, ${blue})`;
+    }
   };
 
   const renderStepGroups = (data, row) => {
