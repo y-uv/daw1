@@ -39,6 +39,7 @@ body {
   padding-right: 10px;
   text-align: right;
   margin-top: 14px;
+  cursor: default;
 }
 
 .sequencer-container {
@@ -63,6 +64,8 @@ body {
   background-color: #ddd;
   border: 1px solid #aaa;
   display: inline-block;
+  cursor: pointer; /* [NEW] Change cursor to crosshair on hover */
+
 }
 
 .step.active {
@@ -138,6 +141,8 @@ body {
 .bpm-control label,
 .bpm-control span {
   margin: 0 5px;
+  min-width: 30px; /* [NEW] Fixed width to avoid shifting */
+  text-align: center; /* Center the text */
 }
 
 .bpm-control input[type="range"] {
@@ -184,12 +189,13 @@ body {
   margin: 0 5px;
   width: 60px;
   text-align: left;
+  cursor: default; /* [NEW] Change cursor to default */
 }
 
 .tap-bpm .tap-value {
   color: #000000;
+  cursor: default; /* [NEW] Change cursor to default */
 }
-
 .tap-bpm button {
   margin-right: 10px;
 }
