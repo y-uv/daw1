@@ -143,9 +143,27 @@ const Sequencer = () => {
   };
 
   const handleBpmChange = (event) => {
-    setBpm(event.target.value);
-    Tone.Transport.bpm.value = event.target.value;
-    updateSliderColor(event.target.value);
+    const newBpm = parseInt(event.target.value);
+    setBpm(newBpm);
+    Tone.Transport.bpm.value = newBpm;
+    updateSliderColor(newBpm);
+  };
+
+  const handleBpmInputChange = (event) => {
+    const newBpm = event.target.value;
+    setBpm(newBpm);
+  };
+
+  const handleBpmInputBlur = (event) => {
+    let newBpm = parseInt(event.target.value);
+    if (isNaN(newBpm) || newBpm < 80) {
+      newBpm = 80;
+    } else if (newBpm > 200) {
+      newBpm = 200;
+    }
+    setBpm(newBpm);
+    Tone.Transport.bpm.value = newBpm;
+    updateSliderColor(newBpm);
   };
 
   const updateSliderColor = (value) => {
@@ -218,7 +236,6 @@ const Sequencer = () => {
           <i className="fas fa-pause"></i>
         </div>
         <button onClick={() => { setStepData(Array(steps).fill(false)); setTomData(Array(steps).fill(false)); setHatData(Array(steps).fill(false)); }}>clear</button>
-
       </div>
       <div className="bpm-control">
         <label htmlFor="bpm">bpm:</label>
@@ -230,7 +247,15 @@ const Sequencer = () => {
           value={bpm}
           onChange={handleBpmChange}
         />
-        <span>{bpm}</span>
+        <input
+          type="number"
+          min="80"
+          max="200"
+          value={bpm}
+          onChange={handleBpmInputChange}
+          onBlur={handleBpmInputBlur}
+          className="bpm-input" /* [NEW] Add class for styling */
+        />
       </div>
       <div className="tap-bpm">
         <button onClick={resetTapBpm}>reset</button>

@@ -31,7 +31,6 @@ body {
   align-items: flex-end;
   justify-content: space-between;
   margin-top: 16px;
-  
 }
 
 .label {
@@ -39,7 +38,7 @@ body {
   padding-right: 10px;
   text-align: right;
   margin-top: 14px;
-  cursor: default;
+  cursor: default; /* [NEW] Change cursor to default */
 }
 
 .sequencer-container {
@@ -65,7 +64,6 @@ body {
   border: 1px solid #aaa;
   display: inline-block;
   cursor: pointer; /* [NEW] Change cursor to crosshair on hover */
-
 }
 
 .step.active {
@@ -176,6 +174,17 @@ body {
   cursor: pointer;
 }
 
+.bpm-input { /* [NEW] Style for bpm input field */
+  width: 60px;
+  margin-left: 10px;
+  font-family: monospace;
+  font-size: 14px;
+  text-align: center;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  outline: none;
+}
+
 .tap-bpm {
   display: flex;
   align-items: center;
@@ -196,6 +205,7 @@ body {
   color: #000000;
   cursor: default; /* [NEW] Change cursor to default */
 }
+
 .tap-bpm button {
   margin-right: 10px;
 }
