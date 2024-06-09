@@ -1,105 +1,194 @@
-/* src/Sequencer.css */
 body {
-    font-family: monospace;
-    text-align: center;
-  }
+  font-family: monospace;
+  text-align: center;
+}
+
+.custom-logo {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  object-fit: contain;
+  margin: 20px auto;
+  transition: filter 0.1s all;
+}
+
+.custom-logo:hover {
+  filter: invert(100%);
+}
+
+.main-container { /* [NEW] Container for both label and sequencer */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.label-container { /* [CHANGED] Moved outside of sequencer-container */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: 16px;
   
-  .custom-logo {
-    width: 100%; /* Adjust width to ensure it doesn't stretch too much */
-    max-width: 400px; /* Maximum width to fit the layout */
-    height: auto; /* Maintain aspect ratio */
-    object-fit: contain; /* Ensure the image is fully visible */
-    margin: 20px auto;
-    transition: filter 0.1s all; /* Smooth transition for hover effect */
-  }
-  
-  .custom-logo:hover {
-    filter: invert(100%); /* Invert colors on hover */
-  }
-  
-  .sequencer {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 10px;
-  }
-  
-  .step {
-    width: 30px;
-    height: 30px;
-    margin: 2px;
-    background-color: #ddd;
-    border: 1px solid #aaa;
-    display: inline-block;
-  }
-  
-  .step.active {
-    background-color: #555;
-  }
-  
-  .step.current {
-    border-color: black;
-  }
-  
-  .group {
-    display: flex;
-  }
-  
-  .group + .group {
-    margin-left: 10px; /* Add spacing between groups */
-  }
-  
-  .controls {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    margin: 10px auto;
-  }
-  
-  .control-button {
-    margin-right: 20px;
-    cursor: pointer;
-  }
-  
-  .control-button i {
-    font-size: 24px;
-  }
-  
-  .bpm-control {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 10px;
-  }
-  
-  .bpm-control label,
-  .bpm-control span {
-    margin: 0 5px;
-  }
-  
-  .bpm-control input[type="range"] {
-    margin: 0 10px;
-  }
-  
-  .tap-bpm {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 10px;
-    color: #333;
-  }
-  
-  .tap-bpm label,
-  .tap-bpm span {
-    margin: 0 5px;
-    width: 60px; /* Fix the width to avoid shifting */
-    text-align: left; /* Ensure proper alignment */
-  }
-  
-  .tap-bpm .tap-value {
-    color: #000000;
-  }
-  
-  .tap-bpm button {
-    margin-right: 10px;
-  }
-  
+}
+
+.label {
+  line-height: 30px;
+  padding-right: 10px;
+  text-align: right;
+  margin-top: 14px;
+}
+
+.sequencer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f0f0f0; /* Light gray background for sequencer container */
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.sequencer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.step {
+  width: 30px;
+  height: 30px;
+  margin: 2px;
+  background-color: #ddd;
+  border: 1px solid #aaa;
+  display: inline-block;
+}
+
+.step.active {
+  background-color: #555;
+}
+
+.step.current {
+  border-color: black;
+}
+
+.group {
+  display: flex;
+}
+
+.group + .group {
+  margin-left: 10px;
+}
+
+.dot-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.dot-container {
+  width: 34px; /* Step width (30px) + margin (2px * 2) */
+  height: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dot-group {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 5px; /* Add spacing between dot groups */
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  background-color: #fff;
+  border-radius: 50%;
+}
+
+.dot.current {
+  background-color: black;
+}
+
+.controls {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding-left: 65px;
+}
+
+.control-button {
+  margin-right: 20px;
+  cursor: pointer;
+}
+
+.control-button i {
+  font-size: 24px;
+}
+
+.bpm-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.bpm-control label,
+.bpm-control span {
+  margin: 0 5px;
+}
+
+.bpm-control input[type="range"] {
+  margin: 0 10px;
+  width: 200px; /* Adjust the width as needed */
+  -webkit-appearance: none; /* Remove default styling */
+  appearance: none; /* Remove default styling */
+  background: #5804ac;
+  height: 8px;
+  border-radius: 5px;
+  outline: none;
+}
+
+.bpm-control input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.bpm-control input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.tap-bpm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  color: #333;
+}
+
+.tap-bpm label,
+.tap-bpm span {
+  margin: 0 5px;
+  width: 60px;
+  text-align: left;
+}
+
+.tap-bpm .tap-value {
+  color: #000000;
+}
+
+.tap-bpm button {
+  margin-right: 10px;
+}

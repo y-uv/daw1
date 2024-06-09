@@ -1,13 +1,12 @@
-// src/Sequencer.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import * as Tone from 'tone';
 import './Sequencer.css';
-
 
 const Sequencer = () => {
   const steps = 16;
   const [stepData, setStepData] = useState(Array(steps).fill(false));
   const [tomData, setTomData] = useState(Array(steps).fill(false));
+  const [hatData, setHatData] = useState(Array(steps).fill(false));
   const [bpm, setBpm] = useState(120);
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -15,9 +14,9 @@ const Sequencer = () => {
   const [tapBpm, setTapBpm] = useState(null);
   const tapTimeoutRef = useRef(null);
 
-  // Load the snare and tom sounds
   const snarePlayer = useRef(null);
   const tomPlayer = useRef(null);
+  const hatPlayer = useRef(null);
 
   useEffect(() => {
     if (snarePlayer.current === null) {
@@ -34,12 +33,22 @@ const Sequencer = () => {
       console.log('Tom player initialized:', tomPlayer.current);
     }
 
+    if (hatPlayer.current === null) {
+      const player = new Tone.Player('/hat.mp3').toDestination();
+      player.autostart = false;
+      hatPlayer.current = player;
+      console.log('Hat player initialized:', hatPlayer.current);
+    }
+
     const sequence = new Tone.Sequence((time, step) => {
       if (stepData[step]) {
         playSound(snarePlayer.current, time);
       }
       if (tomData[step]) {
         playSound(tomPlayer.current, time);
+      }
+      if (hatData[step]) {
+        playSound(hatPlayer.current, time);
       }
       setCurrentStep(step);
     }, Array.from({ length: steps }, (_, i) => i), '16n').start(0);
@@ -49,7 +58,7 @@ const Sequencer = () => {
     return () => {
       sequence.dispose();
     };
-  }, [stepData, tomData, bpm]);
+  }, [stepData, tomData, hatData, bpm]);
 
   useEffect(() => {
     const handleKeyPress = (event) => {
@@ -98,6 +107,9 @@ const Sequencer = () => {
     } else if (row === 'tom') {
       const newTomData = tomData.map((s, stepIndex) => (stepIndex === step ? !s : s));
       setTomData(newTomData);
+    } else if (row === 'hat') {
+      const newHatData = hatData.map((s, stepIndex) => (stepIndex === step ? !s : s));
+      setHatData(newHatData);
     }
   };
 
@@ -107,7 +119,7 @@ const Sequencer = () => {
       console.log('Player loaded state:', player.loaded);
       if (player.loaded) {
         console.log('Playing sound');
-        player.start(time); // Play the sound
+        player.start(time);
       } else {
         console.log('Player is not loaded');
       }
@@ -127,12 +139,21 @@ const Sequencer = () => {
 
   const stopSequencer = () => {
     Tone.Transport.stop();
-    setCurrentStep(0); // Reset to the beginning when stopped
+    setCurrentStep(0);
   };
 
   const handleBpmChange = (event) => {
     setBpm(event.target.value);
     Tone.Transport.bpm.value = event.target.value;
+    updateSliderColor(event.target.value);
+  };
+
+  const updateSliderColor = (value) => {
+    const percentage = (value - 80) / (200 - 80);
+    const red = Math.round(255 * percentage);
+    const blue = 255 - red;
+    const slider = document.getElementById('bpm');
+    slider.style.background = `rgb(${red}, 0, ${blue})`;
   };
 
   const renderStepGroups = (data, row) => {
@@ -156,11 +177,39 @@ const Sequencer = () => {
     );
   };
 
+  const renderDotRow = () => {
+    const groups = Array.from({ length: 4 }, (_, groupIndex) => (
+      <div className="dot-group" key={groupIndex}>
+        {Array.from({ length: 4 }, (_, index) => {
+          const globalIndex = groupIndex * 4 + index;
+          return (
+            <div key={globalIndex} className="dot-container">
+              <div className={`dot ${currentStep === globalIndex ? 'current' : ''}`}></div>
+            </div>
+          );
+        })}
+      </div>
+    ));
+  
+    return <div className="dot-row">{groups}</div>;
+  };
+  
   return (
     <div>
-      <img src="/yuvdaw.jpg" alt="yuvdaw" className='custom-logo'/>
-      {renderStepGroups(stepData, 'snare')}
-      {renderStepGroups(tomData, 'tom')}
+      <img src="/yuvdaw.jpg" alt="yuvdaw" className="custom-logo" />
+      <div className="main-container"> {/* [NEW] Wrap everything inside this */}
+        <div className="label-container">
+          <div className="label">hat</div>
+          <div className="label">snare</div>
+          <div className="label">kick</div>
+        </div>
+        <div className="sequencer-container">
+          {renderDotRow()}
+          {renderStepGroups(hatData, 'hat')}
+          {renderStepGroups(stepData, 'snare')}
+          {renderStepGroups(tomData, 'tom')}
+        </div>
+      </div>
       <div className="controls">
         <div className="control-button" onClick={startSequencer}>
           <i className="fas fa-play"></i>
@@ -168,6 +217,8 @@ const Sequencer = () => {
         <div className="control-button" onClick={stopSequencer}>
           <i className="fas fa-pause"></i>
         </div>
+        <button onClick={() => { setStepData(Array(steps).fill(false)); setTomData(Array(steps).fill(false)); setHatData(Array(steps).fill(false)); }}>clear</button>
+
       </div>
       <div className="bpm-control">
         <label htmlFor="bpm">bpm:</label>
