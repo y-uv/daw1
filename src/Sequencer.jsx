@@ -153,6 +153,21 @@ const Sequencer = () => {
     return Math.max(80, Math.min(200, value));
   };
 
+  const sanitizeBpmInput = (input) => {
+    // Remove any non-numeric characters
+    let sanitizedInput = input.replace(/[^0-9]/g, ''); 
+  
+    // Ensure the sanitized input is within the valid range
+    let parsedInput = parseInt(sanitizedInput, 10);
+    if (isNaN(parsedInput) || parsedInput < 80) {
+      parsedInput = 80;
+    } else if (parsedInput > 200) {
+      parsedInput = 200;
+    }
+  
+    return parsedInput;
+  };
+
   useEffect(() => {
     const constrainedBpm = constrainBpm(bpm);
     Tone.Transport.bpm.value = constrainedBpm;
@@ -177,21 +192,15 @@ const Sequencer = () => {
     }
   }, [kickVolume]);
 
-  const sanitizeBpmInput = (input) => {
-    let sanitizedInput = input.replace(/[^0-9]/g, ''); // Remove non-numeric characters
-    if (sanitizedInput === '') {
-      sanitizedInput = '80'; // Set to minimum value if input is empty
-    }
-    return constrainBpm(parseInt(sanitizedInput));
-  };
-
   const handleBpmChange = (event) => {
     const newBpm = parseInt(event.target.value);
     setBpm(constrainBpm(newBpm));
   };
 
   const handleBpmInputChange = (event) => {
-    setBpm(event.target.value);
+    // Sanitize the input value immediately on change
+    const sanitizedValue = event.target.value.replace(/[^0-9]/g, ''); 
+    setBpm(sanitizedValue);
   };
 
   const handleBpmInputBlur = (event) => {
