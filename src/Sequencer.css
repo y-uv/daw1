@@ -9,12 +9,13 @@ body {
   height: auto;
   object-fit: contain;
   margin: auto;
-  transition: filter 0.1s all;
+  transition: transform 0.2s ease-in-out;
   padding-left: 60px;
 }
 
 .custom-logo:hover {
-  filter: invert(100%);
+  transform: scaleX(1.3);
+  cursor: pointer;
 }
 
 .main-container { /* [NEW] Container for both label and sequencer */
@@ -69,8 +70,6 @@ body {
   height: 30px; /* Adjust height as needed */
   background: black; /* Set background color to black */
   margin-top: 14px; /* Add right padding */
-  
-  
   border-radius: 5px; /* Optional: Add border radius for rounded edges */
 }
 

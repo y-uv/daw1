@@ -296,7 +296,9 @@ const Sequencer = () => {
   
   return (
     <div>
-      <img src="/yuvdaw.jpg" alt="yuvdaw" className="custom-logo" />
+<a href="https://yuv1.com/" target="_blank" rel="noopener noreferrer">
+  <img src="/yuvdaw.png" alt="yuvdaw" className="custom-logo" />
+</a>
       <div className="main-container"> {/* [NEW] Wrap everything inside this */}
         <div className="label-container">
           <div className="label">hat</div>
