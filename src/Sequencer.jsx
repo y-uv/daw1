@@ -10,6 +10,7 @@ const Sequencer = () => {
   const [bpm, setBpm] = useState(120);
   const [currentStep, setCurrentStep] = useState(0);
   const [velocityToggle, setVelocityToggle] = useState('heavy');
+  const [mute, setMute] = useState({ snare: false, tom: false, hat: false });
 
   const [tapTimes, setTapTimes] = useState([]);
   const [tapBpm, setTapBpm] = useState(null);
@@ -49,13 +50,13 @@ const Sequencer = () => {
     }
 
     const sequence = new Tone.Sequence((time, step) => {
-      if (stepData[step] !== 'empty') {
+      if (!mute.snare && stepData[step] !== 'empty') {
         playSound(snarePlayer.current, time, stepData[step] === 'heavy' ? snareVolume : snareVolume - 8);
       }
-      if (tomData[step] !== 'empty') {
+      if (!mute.tom && tomData[step] !== 'empty') {
         playSound(tomPlayer.current, time, tomData[step] === 'heavy' ? kickVolume : kickVolume - 8);
       }
-      if (hatData[step] !== 'empty') {
+      if (!mute.hat && hatData[step] !== 'empty') {
         playSound(hatPlayer.current, time, hatData[step] === 'heavy' ? hatVolume : hatVolume - 8);
       }
       setCurrentStep(step);
@@ -66,7 +67,7 @@ const Sequencer = () => {
     return () => {
       sequence.dispose();
     };
-  }, [stepData, tomData, hatData, bpm, snareVolume, kickVolume, hatVolume]);
+  }, [stepData, tomData, hatData, bpm, snareVolume, kickVolume, hatVolume, mute]);
 
   useEffect(() => {
     const handleKeyPress = (event) => {
@@ -237,17 +238,28 @@ const Sequencer = () => {
     }
   };
 
+  const toggleMute = (track) => {
+    setMute((prev) => ({ ...prev, [track]: !prev[track] }));
+  };
+
   const renderStepGroups = (data, row) => {
+    const isMuted = mute[row];
     return (
       <div className="sequencer">
         {Array.from({ length: 4 }, (_, groupIndex) => (
           <div className="group" key={groupIndex}>
             {data.slice(groupIndex * 4, (groupIndex + 1) * 4).map((step, stepIndex) => {
               const globalIndex = groupIndex * 4 + stepIndex;
+              let stepClass = step !== 'empty' ? step : '';
+              if (isMuted) {
+                if (stepClass === 'heavy') stepClass = 'light';
+                else if (stepClass === 'light') stepClass = 'empty';
+                else if (stepClass === 'empty') stepClass = 'muted-empty';
+              }
               return (
                 <div
                   key={globalIndex}
-                  className={`step ${step !== 'empty' ? step : ''} ${currentStep === globalIndex ? 'current' : ''}`}
+                  className={`step ${stepClass} ${currentStep === globalIndex ? 'current' : ''}`}
                   onClick={() => toggleStep(globalIndex, row)}
                 ></div>
               );
@@ -308,14 +320,14 @@ const Sequencer = () => {
   
   return (
     <div>
-<a href="https://yuv1.com/" target="_blank" rel="noopener noreferrer">
-  <img src="/yuvdaw.png" alt="yuvdaw" className="custom-logo" />
-</a>
-      <div className="main-container"> {/* [NEW] Wrap everything inside this */}
+      <a href="https://yuv1.com/" target="_blank" rel="noopener noreferrer">
+        <img src="/yuvdaw.png" alt="yuvdaw" className="custom-logo" />
+      </a>
+      <div className="main-container">
         <div className="label-container">
-          <div className="label">hat</div>
-          <div className="label">snare</div>
-          <div className="label">kick</div>
+          <div className={`label ${mute.hat ? 'muted' : ''}`} onClick={() => toggleMute('hat')}>hat</div>
+          <div className={`label ${mute.snare ? 'muted' : ''}`} onClick={() => toggleMute('snare')}>snare</div>
+          <div className={`label ${mute.tom ? 'muted' : ''}`} onClick={() => toggleMute('tom')}>kick</div>
         </div>
         {renderVolumeDials()}
         <div className="sequencer-container">
@@ -352,7 +364,7 @@ const Sequencer = () => {
           onChange={handleBpmInputChange}
           onBlur={handleBpmInputBlur}
           onKeyDown={handleKeyDown}
-          className="bpm-input" /* [NEW] Add class for styling */
+          className="bpm-input"
         />
       </div>
       <div className="tap-bpm">
@@ -361,11 +373,11 @@ const Sequencer = () => {
         <span className="tap-value">{tapBpm !== null ? tapBpm : '???'}</span>
       </div>
       <div 
-  className="velocity-toggle-indicator" 
-  style={{ backgroundColor: velocityToggle === 'heavy' ? '#555' : '#aaa', width: '30px', height: '30px', margin: '10px auto', border: '1px solid #aaa', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}
->
-  toggle =j
-</div>
+        className="velocity-toggle-indicator" 
+        style={{ backgroundColor: velocityToggle === 'heavy' ? '#555' : '#aaa', width: '30px', height: '30px', margin: '10px auto', border: '1px solid #aaa', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}
+      >
+        toggle =j
+      </div>
     </div>
   );
 };

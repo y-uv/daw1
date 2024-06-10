@@ -3,6 +3,10 @@ body {
   text-align: center;
 }
 
+.label.muted {
+  text-decoration: line-through;
+}
+
 .custom-logo {
   width: 100%;
   max-width: 400px;
@@ -34,12 +38,16 @@ body {
   margin-top: 24px;
 }
 
+.label-container .label {
+  cursor: pointer;
+}
+
 .label {
   line-height: 30px;
   padding-right: 10px;
   text-align: right;
   margin-top: 14px;
-  cursor: default; /* Change cursor to default */
+  cursor: pointer; /* Change cursor to default */
 }
 
 .sequencer-container {
@@ -113,12 +121,28 @@ body {
   background-color: #555; /* Heavy note color */
 }
 
+.step.empty {
+  background-color: #ddd;
+}
+
 .step.light {
   background-color: #aaa; /* Light note color */
 }
 
 .step.current {
   border-color: black;
+}
+
+.step.muted-empty {
+  background-color: #fff !important;
+}
+
+.step.muted-light {
+  background-color: #ddd;
+}
+
+.step.muted-heavy {
+  background-color: #aaa;
 }
 
 .group {
@@ -153,6 +177,7 @@ body {
   width: 10px;
   height: 10px;
   background-color: #fff;
+  border: 1px solid #aaa;
   border-radius: 50%;
 }
 
