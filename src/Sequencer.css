@@ -18,7 +18,7 @@ body {
   cursor: pointer;
 }
 
-.main-container { /* [NEW] Container for both label and sequencer */
+.main-container { /* Container for both label and sequencer */
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -26,7 +26,7 @@ body {
   border-radius: 8px;
 }
 
-.label-container { /* [CHANGED] Moved outside of sequencer-container */
+.label-container { /* Moved outside of sequencer-container */
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -39,7 +39,7 @@ body {
   padding-right: 10px;
   text-align: right;
   margin-top: 14px;
-  cursor: default; /* [NEW] Change cursor to default */
+  cursor: default; /* Change cursor to default */
 }
 
 .sequencer-container {
@@ -51,7 +51,7 @@ body {
   border-radius: 8px;
 }
 
-.volume-container { /* [NEW] Container for volume dials */
+.volume-container { /* Container for volume dials */
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -60,12 +60,12 @@ body {
   padding-right: 12px;
 }
 
-.volume-dial { /* [CHANGED] Style for volume dials */
+.volume-dial { /* Style for volume dials */
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  writing-mode: vertical-lr; /* [NEW] Writing mode for vertical slider */
-  direction: rtl; /* [NEW] Direction for vertical slider */
+  writing-mode: vertical-lr; /* Writing mode for vertical slider */
+  direction: rtl; /* Direction for vertical slider */
   width: 3px; /* Adjust width as needed */
   height: 30px; /* Adjust height as needed */
   background: black; /* Set background color to black */
@@ -106,11 +106,15 @@ body {
   background-color: #ddd;
   border: 1px solid #aaa;
   display: inline-block;
-  cursor: pointer; /* [NEW] Change cursor to crosshair on hover */
+  cursor: pointer; /* Change cursor to crosshair on hover */
 }
 
-.step.active {
-  background-color: #555;
+.step.heavy {
+  background-color: #555; /* Heavy note color */
+}
+
+.step.light {
+  background-color: #aaa; /* Light note color */
 }
 
 .step.current {
@@ -182,7 +186,7 @@ body {
 .bpm-control label,
 .bpm-control span {
   margin: 0 5px;
-  min-width: 30px; /* [NEW] Fixed width to avoid shifting */
+  min-width: 30px; /* Fixed width to avoid shifting */
   text-align: center; /* Center the text */
 }
 
@@ -217,7 +221,7 @@ body {
   cursor: pointer;
 }
 
-.bpm-input { /* [NEW] Style for bpm input field */
+.bpm-input { /* Style for bpm input field */
   width: 60px;
   margin-left: 10px;
   font-family: monospace;
@@ -241,12 +245,12 @@ body {
   margin: 0 5px;
   width: 60px;
   text-align: left;
-  cursor: default; /* [NEW] Change cursor to default */
+  cursor: default; /* Change cursor to default */
 }
 
 .tap-bpm .tap-value {
   color: #000000;
-  cursor: default; /* [NEW] Change cursor to default */
+  cursor: default; /* Change cursor to default */
 }
 
 .tap-bpm button {

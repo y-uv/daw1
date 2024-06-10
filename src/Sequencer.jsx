@@ -4,11 +4,12 @@ import './Sequencer.css';
 
 const Sequencer = () => {
   const steps = 16;
-  const [stepData, setStepData] = useState(Array(steps).fill(false));
-  const [tomData, setTomData] = useState(Array(steps).fill(false));
-  const [hatData, setHatData] = useState(Array(steps).fill(false));
+  const [stepData, setStepData] = useState(Array(steps).fill('empty'));
+  const [tomData, setTomData] = useState(Array(steps).fill('empty'));
+  const [hatData, setHatData] = useState(Array(steps).fill('empty'));
   const [bpm, setBpm] = useState(120);
   const [currentStep, setCurrentStep] = useState(0);
+  const [velocityToggle, setVelocityToggle] = useState('heavy');
 
   const [tapTimes, setTapTimes] = useState([]);
   const [tapBpm, setTapBpm] = useState(null);
@@ -18,9 +19,9 @@ const Sequencer = () => {
   const tomPlayer = useRef(null);
   const hatPlayer = useRef(null);
 
-  const [hatVolume, setHatVolume] = useState(-16);
-  const [snareVolume, setSnareVolume] = useState(-16);
-  const [kickVolume, setKickVolume] = useState(-16);
+  const [hatVolume, setHatVolume] = useState(-22);
+  const [snareVolume, setSnareVolume] = useState(-20);
+  const [kickVolume, setKickVolume] = useState(-18);
 
   useEffect(() => {
     if (snarePlayer.current === null) {
@@ -48,14 +49,14 @@ const Sequencer = () => {
     }
 
     const sequence = new Tone.Sequence((time, step) => {
-      if (stepData[step]) {
-        playSound(snarePlayer.current, time);
+      if (stepData[step] !== 'empty') {
+        playSound(snarePlayer.current, time, stepData[step] === 'heavy' ? snareVolume : snareVolume - 8);
       }
-      if (tomData[step]) {
-        playSound(tomPlayer.current, time);
+      if (tomData[step] !== 'empty') {
+        playSound(tomPlayer.current, time, tomData[step] === 'heavy' ? kickVolume : kickVolume - 8);
       }
-      if (hatData[step]) {
-        playSound(hatPlayer.current, time);
+      if (hatData[step] !== 'empty') {
+        playSound(hatPlayer.current, time, hatData[step] === 'heavy' ? hatVolume : hatVolume - 8);
       }
       setCurrentStep(step);
     }, Array.from({ length: steps }, (_, i) => i), '16n').start(0);
@@ -85,6 +86,8 @@ const Sequencer = () => {
           resetTapTimeout();
           return newTapTimes;
         });
+      } else if (event.key.toLowerCase() === 'j') {
+        setVelocityToggle((prev) => (prev === 'heavy' ? 'light' : 'heavy'));
       }
     };
 
@@ -108,24 +111,33 @@ const Sequencer = () => {
   };
 
   const toggleStep = (step, row) => {
+    const updateData = (data) => {
+      const newData = data.map((s, stepIndex) => {
+        if (stepIndex === step) {
+          if (s === 'empty') return velocityToggle;
+          else return 'empty';
+        }
+        return s;
+      });
+      return newData;
+    };
+
     if (row === 'snare') {
-      const newStepData = stepData.map((s, stepIndex) => (stepIndex === step ? !s : s));
-      setStepData(newStepData);
+      setStepData((prev) => updateData(prev));
     } else if (row === 'tom') {
-      const newTomData = tomData.map((s, stepIndex) => (stepIndex === step ? !s : s));
-      setTomData(newTomData);
+      setTomData((prev) => updateData(prev));
     } else if (row === 'hat') {
-      const newHatData = hatData.map((s, stepIndex) => (stepIndex === step ? !s : s));
-      setHatData(newHatData);
+      setHatData((prev) => updateData(prev));
     }
   };
 
-  const playSound = (player, time) => {
+  const playSound = (player, time, volume) => {
     console.log('Attempting to play sound at time', time);
     if (player) {
       console.log('Player loaded state:', player.loaded);
       if (player.loaded) {
         console.log('Playing sound');
+        player.volume.value = volume;
         player.start(time);
       } else {
         console.log('Player is not loaded');
@@ -235,7 +247,7 @@ const Sequencer = () => {
               return (
                 <div
                   key={globalIndex}
-                  className={`step ${step ? 'active' : ''} ${currentStep === globalIndex ? 'current' : ''}`}
+                  className={`step ${step !== 'empty' ? step : ''} ${currentStep === globalIndex ? 'current' : ''}`}
                   onClick={() => toggleStep(globalIndex, row)}
                 ></div>
               );
@@ -268,7 +280,7 @@ const Sequencer = () => {
       <div className="volume-container">
         <input
           type="range"
-          min="-42"
+          min="-32"
           max="-12"
           value={hatVolume}
           onChange={(e) => setHatVolume(e.target.value)}
@@ -276,7 +288,7 @@ const Sequencer = () => {
         />
         <input
           type="range"
-          min="-42"
+          min="-32"
           max="-12"
           value={snareVolume}
           onChange={(e) => setSnareVolume(e.target.value)}
@@ -284,7 +296,7 @@ const Sequencer = () => {
         />
         <input
           type="range"
-          min="-42"
+          min="-32"
           max="-12"
           value={kickVolume}
           onChange={(e) => setKickVolume(e.target.value)}
@@ -320,7 +332,7 @@ const Sequencer = () => {
         <div className="control-button" onClick={stopSequencer}>
           <i className="fas fa-pause"></i>
         </div>
-        <button onClick={() => { setStepData(Array(steps).fill(false)); setTomData(Array(steps).fill(false)); setHatData(Array(steps).fill(false)); }}>clear</button>
+        <button onClick={() => { setStepData(Array(steps).fill('empty')); setTomData(Array(steps).fill('empty')); setHatData(Array(steps).fill('empty')); }}>clear</button>
       </div>
       <div className="bpm-control">
         <label htmlFor="bpm">bpm:</label>
@@ -348,6 +360,12 @@ const Sequencer = () => {
         <label>(tap k)</label>
         <span className="tap-value">{tapBpm !== null ? tapBpm : '???'}</span>
       </div>
+      <div 
+  className="velocity-toggle-indicator" 
+  style={{ backgroundColor: velocityToggle === 'heavy' ? '#555' : '#aaa', width: '30px', height: '30px', margin: '10px auto', border: '1px solid #aaa', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}
+>
+  toggle =j
+</div>
     </div>
   );
 };
