@@ -252,9 +252,7 @@ const Sequencer = () => {
               const globalIndex = groupIndex * 4 + stepIndex;
               let stepClass = step !== 'empty' ? step : '';
               if (isMuted) {
-                if (stepClass === 'heavy') stepClass = 'light';
-                else if (stepClass === 'light') stepClass = 'empty';
-                else if (stepClass === 'empty') stepClass = 'muted-empty';
+                stepClass += ' muted';
               }
               return (
                 <div

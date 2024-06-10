@@ -5,6 +5,7 @@ body {
 
 .label.muted {
   text-decoration: line-through;
+  text-decoration-thickness: 2px; /* Adjust the thickness as desired */
 }
 
 .custom-logo {
@@ -133,17 +134,20 @@ body {
   border-color: black;
 }
 
-.step.muted-empty {
-  background-color: #fff !important;
+.step.muted {
+  background-image: repeating-linear-gradient(
+    45deg,
+    #000,
+    #000 3px,
+    transparent 3px,
+    transparent 6px
+  );
+  background-size: 10px 10px;
+  position: relative;
 }
 
-.step.muted-light {
-  background-color: #ddd;
-}
 
-.step.muted-heavy {
-  background-color: #aaa;
-}
+
 
 .group {
   display: flex;
