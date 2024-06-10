@@ -1,11 +1,17 @@
 body {
   font-family: monospace;
   text-align: center;
+  user-select: none;
 }
 
 .label.muted {
   text-decoration: line-through;
   text-decoration-thickness: 2px; /* Adjust the thickness as desired */
+}
+
+.velocity-toggle-indicator {
+  cursor: pointer; /* Add pointer cursor */
+  user-select: none; /* Disable text selection */
 }
 
 .custom-logo {
@@ -85,8 +91,8 @@ body {
 .volume-dial::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 10px;
+  height: 10px;
   background: white;
   border: 1px solid black;
   border-radius: 50%;
@@ -94,8 +100,8 @@ body {
 }
 
 .volume-dial::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
+  width: 10px;
+  height: 10px;
   background: white;
   border: 1px solid black;
   border-radius: 50%;
@@ -144,10 +150,8 @@ body {
   );
   background-size: 10px 10px;
   position: relative;
+  cursor: default; /* Change cursor to default */
 }
-
-
-
 
 .group {
   display: flex;

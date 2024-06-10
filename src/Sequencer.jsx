@@ -88,8 +88,7 @@ const Sequencer = () => {
           return newTapTimes;
         });
       } else if (event.key.toLowerCase() === 'j') {
-        setVelocityToggle((prev) => (prev === 'heavy' ? 'light' : 'heavy'));
-      }
+        toggleVelocity();      }
     };
 
     window.addEventListener('keypress', handleKeyPress);
@@ -112,6 +111,7 @@ const Sequencer = () => {
   };
 
   const toggleStep = (step, row) => {
+    if (mute[row]) return; // Prevent changes if the row is muted
     const updateData = (data) => {
       const newData = data.map((s, stepIndex) => {
         if (stepIndex === step) {
@@ -242,6 +242,10 @@ const Sequencer = () => {
     setMute((prev) => ({ ...prev, [track]: !prev[track] }));
   };
 
+  const toggleVelocity = () => {
+    setVelocityToggle((prev) => (prev === 'heavy' ? 'light' : 'heavy'));
+  };
+
   const renderStepGroups = (data, row) => {
     const isMuted = mute[row];
     return (
@@ -340,10 +344,14 @@ const Sequencer = () => {
           <i className="fas fa-play"></i>
         </div>
         <div className="control-button" onClick={stopSequencer}>
-          <i className="fas fa-pause"></i>
+          <i className="fas fa-stop"></i>
         </div>
-        <button onClick={() => { setStepData(Array(steps).fill('empty')); setTomData(Array(steps).fill('empty')); setHatData(Array(steps).fill('empty')); }}>clear</button>
-      </div>
+        <button onClick={() => { 
+          setStepData(Array(steps).fill('empty')); 
+          setTomData(Array(steps).fill('empty')); 
+          setHatData(Array(steps).fill('empty')); 
+          setMute({ snare: false, tom: false, hat: false }); // Reset mute state
+        }}>clear</button>      </div>
       <div className="bpm-control">
         <label htmlFor="bpm">bpm:</label>
         <input
@@ -367,12 +375,13 @@ const Sequencer = () => {
       </div>
       <div className="tap-bpm">
         <button onClick={resetTapBpm}>reset</button>
-        <label>(tap k)</label>
+        <label>(tap =k)</label>
         <span className="tap-value">{tapBpm !== null ? tapBpm : '???'}</span>
       </div>
       <div 
         className="velocity-toggle-indicator" 
         style={{ backgroundColor: velocityToggle === 'heavy' ? '#555' : '#aaa', width: '30px', height: '30px', margin: '10px auto', border: '1px solid #aaa', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}
+        onClick={toggleVelocity}
       >
         toggle =j
       </div>
