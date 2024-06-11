@@ -344,6 +344,28 @@ const Sequencer = () => {
     }
   };
 
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      if (Tone.context.state !== 'running') {
+        Tone.context.resume().then(() => {
+          console.log('Audio context resumed from user interaction');
+          setShowOverlay(false);
+        }).catch((error) => {
+          console.error('Error resuming audio context from user interaction:', error);
+        });
+      }
+    };
+  
+    document.addEventListener('click', handleUserInteraction);
+    document.addEventListener('touchstart', handleUserInteraction);
+  
+    return () => {
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+    };
+  }, []);
+  
+
   const renderStepGroups = (data, row) => {
     const isMuted = mute[row];
     return (
@@ -506,6 +528,7 @@ const Sequencer = () => {
       </div>
     </div>
   );
+  
 };
 
 export default Sequencer;
