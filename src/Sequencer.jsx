@@ -7,10 +7,11 @@ const Sequencer = () => {
   const [stepData, setStepData] = useState(Array(steps).fill('empty'));
   const [tomData, setTomData] = useState(Array(steps).fill('empty'));
   const [hatData, setHatData] = useState(Array(steps).fill('empty'));
+  const [fxData, setFxData] = useState(Array(steps).fill('empty'));
   const [bpm, setBpm] = useState(120);
   const [currentStep, setCurrentStep] = useState(0);
   const [velocityToggle, setVelocityToggle] = useState('heavy');
-  const [mute, setMute] = useState({ snare: false, tom: false, hat: false });
+  const [mute, setMute] = useState({ snare: false, tom: false, hat: false, fx: false });
 
   const [tapTimes, setTapTimes] = useState([]);
   const [tapBpm, setTapBpm] = useState(null);
@@ -19,10 +20,13 @@ const Sequencer = () => {
   const snarePlayer = useRef(null);
   const tomPlayer = useRef(null);
   const hatPlayer = useRef(null);
+  const fxPlayer = useRef(null);
 
   const [hatVolume, setHatVolume] = useState(-22);
   const [snareVolume, setSnareVolume] = useState(-20);
   const [kickVolume, setKickVolume] = useState(-18);
+  const [fxVolume, setFxVolume] = useState(-20); // Adjust volume as needed
+
 
   useEffect(() => {
     if (snarePlayer.current === null) {
@@ -32,7 +36,7 @@ const Sequencer = () => {
       snarePlayer.current = player;
       console.log('Snare player initialized:', snarePlayer.current);
     }
-
+  
     if (tomPlayer.current === null) {
       const player = new Tone.Player('/stomp.mp3').toDestination();
       player.volume.value = kickVolume;
@@ -40,7 +44,7 @@ const Sequencer = () => {
       tomPlayer.current = player;
       console.log('Tom player initialized:', tomPlayer.current);
     }
-
+  
     if (hatPlayer.current === null) {
       const player = new Tone.Player('/hat.mp3').toDestination();
       player.volume.value = hatVolume;
@@ -48,8 +52,19 @@ const Sequencer = () => {
       hatPlayer.current = player;
       console.log('Hat player initialized:', hatPlayer.current);
     }
-
+  
+    if (fxPlayer.current === null) {
+      const player = new Tone.Player('/fx.mp3').toDestination();
+      player.volume.value = fxVolume; // Use fxVolume state
+      player.autostart = false;
+      fxPlayer.current = player;
+      console.log('FX player initialized:', fxPlayer.current);
+    }
+  
     const sequence = new Tone.Sequence((time, step) => {
+      if (!mute.fx && fxData[step] !== 'empty') {
+        playSound(fxPlayer.current, time, fxData[step] === 'heavy' ? fxVolume : fxVolume - 8);
+      }
       if (!mute.snare && stepData[step] !== 'empty') {
         playSound(snarePlayer.current, time, stepData[step] === 'heavy' ? snareVolume : snareVolume - 8);
       }
@@ -59,15 +74,21 @@ const Sequencer = () => {
       if (!mute.hat && hatData[step] !== 'empty') {
         playSound(hatPlayer.current, time, hatData[step] === 'heavy' ? hatVolume : hatVolume - 8);
       }
+      if ([0, 4, 8, 12].includes(step)) {
+        scaleLogo();
+      }
       setCurrentStep(step);
     }, Array.from({ length: steps }, (_, i) => i), '16n').start(0);
-
+  
     Tone.Transport.bpm.value = bpm;
-
+  
     return () => {
       sequence.dispose();
     };
-  }, [stepData, tomData, hatData, bpm, snareVolume, kickVolume, hatVolume, mute]);
+  }, [stepData, tomData, hatData, fxData, bpm, snareVolume, kickVolume, hatVolume, fxVolume, mute]);
+  
+  
+  
 
   useEffect(() => {
     const handleKeyPress = (event) => {
@@ -122,15 +143,19 @@ const Sequencer = () => {
       });
       return newData;
     };
-
+  
     if (row === 'snare') {
       setStepData((prev) => updateData(prev));
     } else if (row === 'tom') {
       setTomData((prev) => updateData(prev));
     } else if (row === 'hat') {
       setHatData((prev) => updateData(prev));
+    } else if (row === 'fx') {
+      setFxData((prev) => updateData(prev));
     }
   };
+  
+  
 
   const playSound = (player, time, volume) => {
     console.log('Attempting to play sound at time', time);
@@ -296,6 +321,14 @@ const Sequencer = () => {
           type="range"
           min="-32"
           max="-12"
+          value={fxVolume}
+          onChange={(e) => setFxVolume(e.target.value)}
+          className="volume-dial"
+        />
+        <input
+          type="range"
+          min="-32"
+          max="-12"
           value={hatVolume}
           onChange={(e) => setHatVolume(e.target.value)}
           className="volume-dial"
@@ -320,6 +353,7 @@ const Sequencer = () => {
     );
   };
   
+  
   return (
     <div>
       <a href="https://yuv1.com/" target="_blank" rel="noopener noreferrer">
@@ -327,13 +361,15 @@ const Sequencer = () => {
       </a>
       <div className="main-container">
         <div className="label-container">
+          <div className={`label ${mute.fx ? 'muted' : ''}`} onClick={() => toggleMute('fx')}>tri</div>
           <div className={`label ${mute.hat ? 'muted' : ''}`} onClick={() => toggleMute('hat')}>hat</div>
-          <div className={`label ${mute.snare ? 'muted' : ''}`} onClick={() => toggleMute('snare')}>snare</div>
+          <div className={`label ${mute.snare ? 'muted' : ''}`} onClick={() => toggleMute('snare')}>snap</div>
           <div className={`label ${mute.tom ? 'muted' : ''}`} onClick={() => toggleMute('tom')}>kick</div>
         </div>
         {renderVolumeDials()}
         <div className="sequencer-container">
           {renderDotRow()}
+          {renderStepGroups(fxData, 'fx')}
           {renderStepGroups(hatData, 'hat')}
           {renderStepGroups(stepData, 'snare')}
           {renderStepGroups(tomData, 'tom')}
@@ -350,8 +386,10 @@ const Sequencer = () => {
           setStepData(Array(steps).fill('empty')); 
           setTomData(Array(steps).fill('empty')); 
           setHatData(Array(steps).fill('empty')); 
-          setMute({ snare: false, tom: false, hat: false }); // Reset mute state
-        }}>clear</button>      </div>
+          setFxData(Array(steps).fill('empty'));
+          setMute({ snare: false, tom: false, hat: false, fx: false }); // Reset mute state
+        }}>clear</button>
+      </div>
       <div className="bpm-control">
         <label htmlFor="bpm">bpm:</label>
         <input
@@ -387,6 +425,7 @@ const Sequencer = () => {
       </div>
     </div>
   );
+  
 };
 
 export default Sequencer;
