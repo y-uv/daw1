@@ -181,13 +181,36 @@ const Sequencer = () => {
   };
 
   const startSequencer = () => {
-    Tone.start().then(() => {
-      console.log('Audio context started');
+    if (Tone.context.state !== 'running') {
+      Tone.context.resume().then(() => {
+        console.log('Audio context resumed');
+        Tone.Transport.start();
+      }).catch((error) => {
+        console.error('Error resuming audio context:', error);
+      });
+    } else {
       Tone.Transport.start();
-    }).catch((error) => {
-      console.error('Error starting audio context:', error);
-    });
+    }
   };
+  
+  // Add a touch event listener for mobile devices to resume audio context
+  useEffect(() => {
+    const handleTouchStart = () => {
+      if (Tone.context.state !== 'running') {
+        Tone.context.resume().then(() => {
+          console.log('Audio context resumed from touch event');
+        }).catch((error) => {
+          console.error('Error resuming audio context from touch event:', error);
+        });
+      }
+    };
+  
+    window.addEventListener('touchstart', handleTouchStart);
+  
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+    };
+  }, []);
 
   const stopSequencer = () => {
     Tone.Transport.stop();
