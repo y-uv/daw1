@@ -364,7 +364,7 @@ const Sequencer = () => {
           <div className={`label ${mute.fx ? 'muted' : ''}`} onClick={() => toggleMute('fx')}>tri</div>
           <div className={`label ${mute.hat ? 'muted' : ''}`} onClick={() => toggleMute('hat')}>hat</div>
           <div className={`label ${mute.snare ? 'muted' : ''}`} onClick={() => toggleMute('snare')}>snap</div>
-          <div className={`label ${mute.tom ? 'muted' : ''}`} onClick={() => toggleMute('tom')}>kick</div>
+          <div className={`label ${mute.tom ? 'muted' : ''}`} onClick={() => toggleMute('tom')}>stomp</div>
         </div>
         {renderVolumeDials()}
         <div className="sequencer-container">
