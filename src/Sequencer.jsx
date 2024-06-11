@@ -509,7 +509,7 @@ const Sequencer = () => {
       <audio ref={silentAudioRef}>
         <source src="/silent.mp3" type="audio/mp3" />
       </audio>
-      <a href="https://yuv1.com/" target="_blank" rel="noopener noreferrer">
+      <a >
 
         <img src="/yuvdaw.png" alt="yuvdaw" className="custom-logo" />
         </a>
