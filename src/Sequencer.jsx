@@ -4,6 +4,7 @@ import './Sequencer.css';
 
 const Sequencer = () => {
   const steps = 16;
+  const voices = 4; // Number of overlapping voices
   const [stepData, setStepData] = useState(Array(steps).fill('empty'));
   const [tomData, setTomData] = useState(Array(steps).fill('empty'));
   const [hatData, setHatData] = useState(Array(steps).fill('empty'));
@@ -20,10 +21,10 @@ const Sequencer = () => {
   const [tapBpm, setTapBpm] = useState(null);
   const tapTimeoutRef = useRef(null);
 
-  const snarePlayer = useRef(null);
-  const tomPlayer = useRef(null);
-  const hatPlayer = useRef(null);
-  const fxPlayer = useRef(null);
+  const snarePlayers = useRef([]);
+  const tomPlayers = useRef([]);
+  const hatPlayers = useRef([]);
+  const fxPlayers = useRef([]);
 
   const [hatVolume, setHatVolume] = useState(-22);
   const [snareVolume, setSnareVolume] = useState(-20);
@@ -54,6 +55,15 @@ const Sequencer = () => {
         fx: { label: "oh", file: "/oh.mp3" },
       },
     },
+    {
+      name: "tskit",
+      tracks: {
+        snare: { label: "snare", file: "/tsksnare.mp3" },
+        tom: { label: "808", file: "/tsk808.mp3" },
+        hat: { label: "hat", file: "/tskhat.mp3" },
+        fx: { label: "boop", file: "/tskperc.mp3" },
+      },
+    },
     // Add more kits as needed
   ];
 
@@ -62,44 +72,45 @@ const Sequencer = () => {
   useEffect(() => {
     const kit = drumKits[currentKit].tracks;
 
-    if (!snarePlayer.current || snarePlayer.current.buffer.url !== kit.snare.file) {
-      snarePlayer.current = new Tone.Player(kit.snare.file).toDestination();
-      snarePlayer.current.volume.value = snareVolume;
-      snarePlayer.current.autostart = false;
-    }
+    snarePlayers.current = Array.from({ length: voices }, () => new Tone.Player(kit.snare.file).toDestination());
+    tomPlayers.current = Array.from({ length: voices }, () => new Tone.Player(kit.tom.file).toDestination());
+    hatPlayers.current = Array.from({ length: voices }, () => new Tone.Player(kit.hat.file).toDestination());
+    fxPlayers.current = Array.from({ length: voices }, () => new Tone.Player(kit.fx.file).toDestination());
 
-    if (!tomPlayer.current || tomPlayer.current.buffer.url !== kit.tom.file) {
-      tomPlayer.current = new Tone.Player(kit.tom.file).toDestination();
-      tomPlayer.current.volume.value = kickVolume;
-      tomPlayer.current.autostart = false;
-    }
+    snarePlayers.current.forEach(player => {
+      player.volume.value = snareVolume;
+      player.autostart = false;
+    });
 
-    if (!hatPlayer.current || hatPlayer.current.buffer.url !== kit.hat.file) {
-      hatPlayer.current = new Tone.Player(kit.hat.file).toDestination();
-      hatPlayer.current.volume.value = hatVolume;
-      hatPlayer.current.autostart = false;
-    }
+    tomPlayers.current.forEach(player => {
+      player.volume.value = kickVolume;
+      player.autostart = false;
+    });
 
-    if (!fxPlayer.current || fxPlayer.current.buffer.url !== kit.fx.file) {
-      fxPlayer.current = new Tone.Player(kit.fx.file).toDestination();
-      fxPlayer.current.volume.value = fxVolume;
-      fxPlayer.current.autostart = false;
-    }
+    hatPlayers.current.forEach(player => {
+      player.volume.value = hatVolume;
+      player.autostart = false;
+    });
+
+    fxPlayers.current.forEach(player => {
+      player.volume.value = fxVolume;
+      player.autostart = false;
+    });
   }, [currentKit, snareVolume, kickVolume, hatVolume, fxVolume]);
 
   useEffect(() => {
     const sequence = new Tone.Sequence((time, step) => {
       if (!mute.fx && fxData[step] !== 'empty') {
-        playSound(fxPlayer.current, time, fxData[step] === 'heavy' ? fxVolume : fxVolume - 8);
+        playSound(fxPlayers.current, time, fxData[step] === 'heavy' ? fxVolume : fxVolume - 8);
       }
       if (!mute.snare && stepData[step] !== 'empty') {
-        playSound(snarePlayer.current, time, stepData[step] === 'heavy' ? snareVolume : snareVolume - 8);
+        playSound(snarePlayers.current, time, stepData[step] === 'heavy' ? snareVolume : snareVolume - 8);
       }
       if (!mute.tom && tomData[step] !== 'empty') {
-        playSound(tomPlayer.current, time, tomData[step] === 'heavy' ? kickVolume : kickVolume - 8);
+        playSound(tomPlayers.current, time, tomData[step] === 'heavy' ? kickVolume : kickVolume - 8);
       }
       if (!mute.hat && hatData[step] !== 'empty') {
-        playSound(hatPlayer.current, time, hatData[step] === 'heavy' ? hatVolume : hatVolume - 8);
+        playSound(hatPlayers.current, time, hatData[step] === 'heavy' ? hatVolume : hatVolume - 8);
       }
       setCurrentStep(step);
     }, Array.from({ length: steps }, (_, i) => i), '16n').start(0);
@@ -207,7 +218,8 @@ const Sequencer = () => {
     }
   };
 
-  const playSound = (player, time, volume) => {
+  const playSound = (players, time, volume) => {
+    const player = players.find(player => !player.state || player.state === 'stopped');
     if (player && player.loaded) {
       player.volume.value = volume;
       player.start(time);
@@ -265,22 +277,28 @@ const Sequencer = () => {
   }, [bpm]);
 
   useEffect(() => {
-    if (hatPlayer.current) {
-      hatPlayer.current.volume.value = hatVolume;
-    }
-  }, [hatVolume]);
-
-  useEffect(() => {
-    if (snarePlayer.current) {
-      snarePlayer.current.volume.value = snareVolume;
-    }
+    snarePlayers.current.forEach(player => {
+      player.volume.value = snareVolume;
+    });
   }, [snareVolume]);
 
   useEffect(() => {
-    if (tomPlayer.current) {
-      tomPlayer.current.volume.value = kickVolume;
-    }
+    tomPlayers.current.forEach(player => {
+      player.volume.value = kickVolume;
+    });
   }, [kickVolume]);
+
+  useEffect(() => {
+    hatPlayers.current.forEach(player => {
+      player.volume.value = hatVolume;
+    });
+  }, [hatVolume]);
+
+  useEffect(() => {
+    fxPlayers.current.forEach(player => {
+      player.volume.value = fxVolume;
+    });
+  }, [fxVolume]);
 
   const handleBpmChange = (event) => {
     const newBpm = parseInt(event.target.value);
