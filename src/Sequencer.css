@@ -312,3 +312,35 @@ body {
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
+
+.bank-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  width: 115px; /* Adjust the width as necessary */
+  margin: 0 auto; /* Center the bank selector within its parent container */
+  left: 220px;
+  top: 180px;
+}
+
+.bank-selector button {
+  width: 20px; /* Fixed width for buttons */
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0; /* Light gray background for sequencer container */
+
+}
+
+.kit-name {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: bold;
+  pointer-events: none; /* Prevent interactions from affecting position */
+}
+
+
+

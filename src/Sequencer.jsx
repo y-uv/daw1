@@ -35,35 +35,59 @@ const Sequencer = () => {
 
   const silentAudioRef = useRef(null);
 
+  const drumKits = [
+    {
+      name: "jersey",
+      tracks: {
+        snare: { label: "snap", file: "/snap.mp3" },
+        tom: { label: "stomp", file: "/stomp.mp3" },
+        hat: { label: "hat", file: "/hat.mp3" },
+        fx: { label: "tri", file: "/fx.mp3" },
+      },
+    },
+    {
+      name: "glo",
+      tracks: {
+        snare: { label: "clapz", file: "/clapsnare.mp3" },
+        tom: { label: "chant", file: "/chant.mp3" },
+        hat: { label: "hit1", file: "/hit1.mp3" },
+        fx: { label: "oh", file: "/oh.mp3" },
+      },
+    },
+    // Add more kits as needed
+  ];
+
+  const [currentKit, setCurrentKit] = useState(0);
+
   useEffect(() => {
-    if (snarePlayer.current === null) {
-      const player = new Tone.Player('/snap.mp3').toDestination();
-      player.volume.value = snareVolume;
-      player.autostart = false;
-      snarePlayer.current = player;
+    const kit = drumKits[currentKit].tracks;
+
+    if (!snarePlayer.current || snarePlayer.current.buffer.url !== kit.snare.file) {
+      snarePlayer.current = new Tone.Player(kit.snare.file).toDestination();
+      snarePlayer.current.volume.value = snareVolume;
+      snarePlayer.current.autostart = false;
     }
 
-    if (tomPlayer.current === null) {
-      const player = new Tone.Player('/stomp.mp3').toDestination();
-      player.volume.value = kickVolume;
-      player.autostart = false;
-      tomPlayer.current = player;
+    if (!tomPlayer.current || tomPlayer.current.buffer.url !== kit.tom.file) {
+      tomPlayer.current = new Tone.Player(kit.tom.file).toDestination();
+      tomPlayer.current.volume.value = kickVolume;
+      tomPlayer.current.autostart = false;
     }
 
-    if (hatPlayer.current === null) {
-      const player = new Tone.Player('/hat.mp3').toDestination();
-      player.volume.value = hatVolume;
-      player.autostart = false;
-      hatPlayer.current = player;
+    if (!hatPlayer.current || hatPlayer.current.buffer.url !== kit.hat.file) {
+      hatPlayer.current = new Tone.Player(kit.hat.file).toDestination();
+      hatPlayer.current.volume.value = hatVolume;
+      hatPlayer.current.autostart = false;
     }
 
-    if (fxPlayer.current === null) {
-      const player = new Tone.Player('/fx.mp3').toDestination();
-      player.volume.value = fxVolume;
-      player.autostart = false;
-      fxPlayer.current = player;
+    if (!fxPlayer.current || fxPlayer.current.buffer.url !== kit.fx.file) {
+      fxPlayer.current = new Tone.Player(kit.fx.file).toDestination();
+      fxPlayer.current.volume.value = fxVolume;
+      fxPlayer.current.autostart = false;
     }
+  }, [currentKit, snareVolume, kickVolume, hatVolume, fxVolume]);
 
+  useEffect(() => {
     const sequence = new Tone.Sequence((time, step) => {
       if (!mute.fx && fxData[step] !== 'empty') {
         playSound(fxPlayer.current, time, fxData[step] === 'heavy' ? fxVolume : fxVolume - 8);
@@ -227,11 +251,11 @@ const Sequencer = () => {
     let sanitizedInput = input.replace(/[^0-9]/g, '');
     let parsedInput = parseInt(sanitizedInput, 10);
     if (isNaN(parsedInput) || parsedInput < 80) {
-      parsedInput = 80;
+      sanitizedInput = 80;
     } else if (parsedInput > 200) {
-      parsedInput = 200;
+      sanitizedInput = 200;
     }
-    return parsedInput;
+    return sanitizedInput;
   };
 
   useEffect(() => {
@@ -438,6 +462,14 @@ const Sequencer = () => {
     );
   };
 
+  const previousKit = () => {
+    setCurrentKit((prev) => (prev > 0 ? prev - 1 : drumKits.length - 1));
+  };
+
+  const nextKit = () => {
+    setCurrentKit((prev) => (prev < drumKits.length - 1 ? prev + 1 : 0));
+  };
+
   return (
     <div>
       {showOverlay && (
@@ -454,11 +486,24 @@ const Sequencer = () => {
         <img src="/yuvdaw.png" alt="yuvdaw" className="custom-logo" />
       </a>
       <div className="main-container">
+      <div className="bank-selector">
+      <button onClick={previousKit}>{"<"}</button>
+        <span className="kit-name">{drumKits[currentKit].name}</span>
+      <button onClick={nextKit}>{">"}</button>
+      </div>
         <div className="label-container">
-          <div className={`label ${mute.fx ? 'muted' : ''}`} onClick={() => toggleMute('fx')}>tri</div>
-          <div className={`label ${mute.hat ? 'muted' : ''}`} onClick={() => toggleMute('hat')}>hat</div>
-          <div className={`label ${mute.snare ? 'muted' : ''}`} onClick={() => toggleMute('snare')}>snap</div>
-          <div className={`label ${mute.tom ? 'muted' : ''}`} onClick={() => toggleMute('tom')}>stomp</div>
+          <div className={`label ${mute.fx ? 'muted' : ''}`} onClick={() => toggleMute('fx')}>
+            {drumKits[currentKit].tracks.fx.label}
+          </div>
+          <div className={`label ${mute.hat ? 'muted' : ''}`} onClick={() => toggleMute('hat')}>
+            {drumKits[currentKit].tracks.hat.label}
+          </div>
+          <div className={`label ${mute.snare ? 'muted' : ''}`} onClick={() => toggleMute('snare')}>
+            {drumKits[currentKit].tracks.snare.label}
+          </div>
+          <div className={`label ${mute.tom ? 'muted' : ''}`} onClick={() => toggleMute('tom')}>
+            {drumKits[currentKit].tracks.tom.label}
+          </div>
         </div>
         {renderVolumeDials()}
         <div className="sequencer-container">
