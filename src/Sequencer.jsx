@@ -3,7 +3,7 @@ import * as Tone from 'tone';
 import './Sequencer.css';
 
 const Sequencer = () => {
-  const steps = 16;
+  const steps = 32; // Change to 32 steps
   const voices = 4; // Number of overlapping voices
   const [stepData, setStepData] = useState(Array(steps).fill('empty'));
   const [tomData, setTomData] = useState(Array(steps).fill('empty'));
@@ -149,7 +149,7 @@ const Sequencer = () => {
           resetTapTimeout();
           return newTapTimes;
         });
-      } else if (event.key.toLowerCase() === 'j') {
+      } else if (event.key.toLowerCase() === 'b') {
         toggleVelocity();
       }
     };
@@ -409,7 +409,7 @@ const Sequencer = () => {
     const isMuted = mute[row];
     return (
       <div className="sequencer">
-        {Array.from({ length: 4 }, (_, groupIndex) => (
+        {Array.from({ length: 8 }, (_, groupIndex) => ( // Updated to 8 groups
           <div className="group" key={groupIndex}>
             {data.slice(groupIndex * 4, (groupIndex + 1) * 4).map((step, stepIndex) => {
               const globalIndex = groupIndex * 4 + stepIndex;
@@ -434,7 +434,7 @@ const Sequencer = () => {
   };
 
   const renderDotRow = () => {
-    const groups = Array.from({ length: 4 }, (_, groupIndex) => (
+    const groups = Array.from({ length: 8 }, (_, groupIndex) => ( // Updated to 8 groups
       <div className="dot-group" key={groupIndex}>
         {Array.from({ length: 4 }, (_, index) => {
           const globalIndex = groupIndex * 4 + index;
@@ -502,7 +502,7 @@ const Sequencer = () => {
       {showOverlay && (
         <div className="overlay" onClick={startSequencer}>
           <div className="overlay-content">
-            <p>Tap to start the audio</p>
+            <p>interact 2 start</p>
           </div>
         </div>
       )}
@@ -510,8 +510,9 @@ const Sequencer = () => {
         <source src="/silent.mp3" type="audio/mp3" />
       </audio>
       <a href="https://yuv1.com/" target="_blank" rel="noopener noreferrer">
+
         <img src="/yuvdaw.png" alt="yuvdaw" className="custom-logo" />
-      </a>
+        </a>
       <div className="main-container">
       <div className="bank-selector">
       <button onClick={previousKit}>{"<"}</button>
@@ -542,20 +543,31 @@ const Sequencer = () => {
         </div>
       </div>
       <div className="controls">
-        <div className="control-button" onClick={startSequencer}>
-          <i className="fas fa-play"></i>
-        </div>
-        <div className="control-button" onClick={stopSequencer}>
-          <i className="fas fa-stop"></i>
-        </div>
-        <button onClick={() => {
-          setStepData(Array(steps).fill('empty'));
-          setTomData(Array(steps).fill('empty'));
-          setHatData(Array(steps).fill('empty'));
-          setFxData(Array(steps).fill('empty'));
-          setMute({ snare: false, tom: false, hat: false, fx: false });
-        }}>clear</button>
-      </div>
+  <div
+    className="control-button2"
+    onClick={toggleVelocity}
+    style={{
+      color: velocityToggle === 'heavy' ? '#283444' : '#aaa',
+    }}
+  >
+    <i className="fas fa-pencil"></i>
+  </div>
+  <div className="control-button" onClick={startSequencer} color='#283444'>
+    <i className="fas fa-play"></i>
+  </div>
+  <div className="control-button" onClick={stopSequencer} color='#283444'>
+    <i className="fas fa-stop"></i>
+  </div>
+  <button onClick={() => {
+    setStepData(Array(steps).fill('empty'));
+    setTomData(Array(steps).fill('empty'));
+    setHatData(Array(steps).fill('empty'));
+    setFxData(Array(steps).fill('empty'));
+    setMute({ snare: false, tom: false, hat: false, fx: false });
+  }}>clear all</button>
+</div>
+
+
       <div className="bpm-control">
         <label htmlFor="bpm">bpm:</label>
         <input
@@ -578,10 +590,11 @@ const Sequencer = () => {
         />
       </div>
       <div className="tap-bpm">
-        <button onClick={resetTapBpm}>reset</button>
-        <label>(tap =k)</label>
+        <button onClick={resetTapBpm}>reset tap</button>
+        <label>(tap bpm w/ k)</label>
         <span className="tap-value">{tapBpm !== null ? tapBpm : '???'}</span>
       </div>
+      {/*
       <div
         className="velocity-toggle-indicator"
         style={{ backgroundColor: velocityToggle === 'heavy' ? '#555' : '#aaa', width: '30px', height: '30px', margin: '10px auto', border: '1px solid #aaa', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}
@@ -589,6 +602,7 @@ const Sequencer = () => {
       >
         toggle =j
       </div>
+    */}
     </div>
   );
 };
