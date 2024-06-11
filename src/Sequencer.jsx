@@ -56,12 +56,21 @@ const Sequencer = () => {
       },
     },
     {
-      name: "tskit",
+      name: "tsk",
       tracks: {
         snare: { label: "snare", file: "/tsksnare.mp3" },
         tom: { label: "808", file: "/tsk808.mp3" },
         hat: { label: "hat", file: "/tskhat.mp3" },
         fx: { label: "boop", file: "/tskperc.mp3" },
+      },
+    },
+    {
+      name: "plugg",
+      tracks: {
+        snare: { label: "clap", file: "/pluggclap.mp3" },
+        tom: { label: "snare", file: "/pluggsnare.mp3" },
+        hat: { label: "hat", file: "/plugghat.mp3" },
+        fx: { label: "crash", file: "/pluggcrash.mp3" },
       },
     },
     // Add more kits as needed
