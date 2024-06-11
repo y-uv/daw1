@@ -13,8 +13,8 @@ const Sequencer = () => {
   const [velocityToggle, setVelocityToggle] = useState('heavy');
   const [mute, setMute] = useState({ snare: false, tom: false, hat: false, fx: false });
 
-  const [isDragging, setIsDragging] = useState(false); // State to track dragging
-  const [dragToggle, setDragToggle] = useState('empty'); // State to track toggle action during drag
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragToggle, setDragToggle] = useState('empty');
 
   const [tapTimes, setTapTimes] = useState([]);
   const [tapBpm, setTapBpm] = useState(null);
@@ -28,7 +28,10 @@ const Sequencer = () => {
   const [hatVolume, setHatVolume] = useState(-22);
   const [snareVolume, setSnareVolume] = useState(-20);
   const [kickVolume, setKickVolume] = useState(-18);
-  const [fxVolume, setFxVolume] = useState(-20); // Adjust volume as needed
+  const [fxVolume, setFxVolume] = useState(-20);
+
+  const [audioStarted, setAudioStarted] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(true);
 
   useEffect(() => {
     if (snarePlayer.current === null) {
@@ -36,7 +39,6 @@ const Sequencer = () => {
       player.volume.value = snareVolume;
       player.autostart = false;
       snarePlayer.current = player;
-      console.log('Snare player initialized:', snarePlayer.current);
     }
 
     if (tomPlayer.current === null) {
@@ -44,7 +46,6 @@ const Sequencer = () => {
       player.volume.value = kickVolume;
       player.autostart = false;
       tomPlayer.current = player;
-      console.log('Tom player initialized:', tomPlayer.current);
     }
 
     if (hatPlayer.current === null) {
@@ -52,15 +53,13 @@ const Sequencer = () => {
       player.volume.value = hatVolume;
       player.autostart = false;
       hatPlayer.current = player;
-      console.log('Hat player initialized:', hatPlayer.current);
     }
 
     if (fxPlayer.current === null) {
       const player = new Tone.Player('/fx.mp3').toDestination();
-      player.volume.value = fxVolume; // Use fxVolume state
+      player.volume.value = fxVolume;
       player.autostart = false;
       fxPlayer.current = player;
-      console.log('FX player initialized:', fxPlayer.current);
     }
 
     const sequence = new Tone.Sequence((time, step) => {
@@ -128,6 +127,24 @@ const Sequencer = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleTouchStart = () => {
+      if (Tone.context.state !== 'running') {
+        Tone.context.resume().then(() => {
+          console.log('Audio context resumed from touch event');
+        }).catch((error) => {
+          console.error('Error resuming audio context from touch event:', error);
+        });
+      }
+    };
+
+    window.addEventListener('touchstart', handleTouchStart);
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+    };
+  }, []);
+
   const resetTapTimeout = () => {
     if (tapTimeoutRef.current) {
       clearTimeout(tapTimeoutRef.current);
@@ -141,7 +158,7 @@ const Sequencer = () => {
   };
 
   const toggleStep = (step, row) => {
-    if (mute[row]) return; // Prevent changes if the row is muted
+    if (mute[row]) return;
     const updateData = (data) => {
       const newData = data.map((s, stepIndex) => {
         if (stepIndex === step) {
@@ -165,52 +182,27 @@ const Sequencer = () => {
   };
 
   const playSound = (player, time, volume) => {
-    console.log('Attempting to play sound at time', time);
-    if (player) {
-      console.log('Player loaded state:', player.loaded);
-      if (player.loaded) {
-        console.log('Playing sound');
-        player.volume.value = volume;
-        player.start(time);
-      } else {
-        console.log('Player is not loaded');
-      }
-    } else {
-      console.log('Player not initialized');
+    if (player && player.loaded) {
+      player.volume.value = volume;
+      player.start(time);
     }
   };
 
   const startSequencer = () => {
     if (Tone.context.state !== 'running') {
       Tone.context.resume().then(() => {
-        console.log('Audio context resumed');
         Tone.Transport.start();
+        setAudioStarted(true);
+        setShowOverlay(false);
       }).catch((error) => {
         console.error('Error resuming audio context:', error);
       });
     } else {
       Tone.Transport.start();
+      setAudioStarted(true);
+      setShowOverlay(false);
     }
   };
-  
-  // Add a touch event listener for mobile devices to resume audio context
-  useEffect(() => {
-    const handleTouchStart = () => {
-      if (Tone.context.state !== 'running') {
-        Tone.context.resume().then(() => {
-          console.log('Audio context resumed from touch event');
-        }).catch((error) => {
-          console.error('Error resuming audio context from touch event:', error);
-        });
-      }
-    };
-  
-    window.addEventListener('touchstart', handleTouchStart);
-  
-    return () => {
-      window.removeEventListener('touchstart', handleTouchStart);
-    };
-  }, []);
 
   const stopSequencer = () => {
     Tone.Transport.stop();
@@ -222,24 +214,20 @@ const Sequencer = () => {
   };
 
   const sanitizeBpmInput = (input) => {
-    // Remove any non-numeric characters
     let sanitizedInput = input.replace(/[^0-9]/g, '');
-
-    // Ensure the sanitized input is within the valid range
     let parsedInput = parseInt(sanitizedInput, 10);
     if (isNaN(parsedInput) || parsedInput < 80) {
       parsedInput = 80;
     } else if (parsedInput > 200) {
       parsedInput = 200;
     }
-
     return parsedInput;
   };
 
   useEffect(() => {
     const constrainedBpm = constrainBpm(bpm);
     Tone.Transport.bpm.value = constrainedBpm;
-    updateSliderColor(constrainedBpm); // Update slider color based on constrained BPM
+    updateSliderColor(constrainedBpm);
   }, [bpm]);
 
   useEffect(() => {
@@ -266,7 +254,6 @@ const Sequencer = () => {
   };
 
   const handleBpmInputChange = (event) => {
-    // Sanitize the input value immediately on change
     const sanitizedValue = event.target.value.replace(/[^0-9]/g, '');
     setBpm(sanitizedValue);
   };
@@ -302,15 +289,16 @@ const Sequencer = () => {
   };
 
   const handleMouseDown = (step, row) => {
+    if (mute[row]) return; // Prevent changes if the row is muted
     setIsDragging(true);
     const currentState = getStateForRow(row)[step];
     const newToggleState = currentState === 'empty' ? velocityToggle : 'empty';
     setDragToggle(newToggleState);
     toggleStepWithState(step, row, newToggleState);
   };
-
+  
   const handleMouseEnter = (step, row) => {
-    if (isDragging) {
+    if (isDragging && !mute[row]) {
       toggleStepWithState(step, row, dragToggle);
     }
   };
@@ -442,6 +430,13 @@ const Sequencer = () => {
 
   return (
     <div>
+      {showOverlay && (
+        <div className="overlay" onClick={startSequencer}>
+          <div className="overlay-content">
+            <p>Tap to start the audio</p>
+          </div>
+        </div>
+      )}
       <a href="https://yuv1.com/" target="_blank" rel="noopener noreferrer">
         <img src="/yuvdaw.png" alt="yuvdaw" className="custom-logo" />
       </a>
@@ -473,7 +468,7 @@ const Sequencer = () => {
           setTomData(Array(steps).fill('empty'));
           setHatData(Array(steps).fill('empty'));
           setFxData(Array(steps).fill('empty'));
-          setMute({ snare: false, tom: false, hat: false, fx: false }); // Reset mute state
+          setMute({ snare: false, tom: false, hat: false, fx: false });
         }}>clear</button>
       </div>
       <div className="bpm-control">
