@@ -13,6 +13,9 @@ const Sequencer = () => {
   const [velocityToggle, setVelocityToggle] = useState('heavy');
   const [mute, setMute] = useState({ snare: false, tom: false, hat: false, fx: false });
 
+  const [isDragging, setIsDragging] = useState(false); // State to track dragging
+  const [dragToggle, setDragToggle] = useState('empty'); // State to track toggle action during drag
+
   const [tapTimes, setTapTimes] = useState([]);
   const [tapBpm, setTapBpm] = useState(null);
   const tapTimeoutRef = useRef(null);
@@ -27,7 +30,6 @@ const Sequencer = () => {
   const [kickVolume, setKickVolume] = useState(-18);
   const [fxVolume, setFxVolume] = useState(-20); // Adjust volume as needed
 
-
   useEffect(() => {
     if (snarePlayer.current === null) {
       const player = new Tone.Player('/snap.mp3').toDestination();
@@ -36,7 +38,7 @@ const Sequencer = () => {
       snarePlayer.current = player;
       console.log('Snare player initialized:', snarePlayer.current);
     }
-  
+
     if (tomPlayer.current === null) {
       const player = new Tone.Player('/stomp.mp3').toDestination();
       player.volume.value = kickVolume;
@@ -44,7 +46,7 @@ const Sequencer = () => {
       tomPlayer.current = player;
       console.log('Tom player initialized:', tomPlayer.current);
     }
-  
+
     if (hatPlayer.current === null) {
       const player = new Tone.Player('/hat.mp3').toDestination();
       player.volume.value = hatVolume;
@@ -52,7 +54,7 @@ const Sequencer = () => {
       hatPlayer.current = player;
       console.log('Hat player initialized:', hatPlayer.current);
     }
-  
+
     if (fxPlayer.current === null) {
       const player = new Tone.Player('/fx.mp3').toDestination();
       player.volume.value = fxVolume; // Use fxVolume state
@@ -60,7 +62,7 @@ const Sequencer = () => {
       fxPlayer.current = player;
       console.log('FX player initialized:', fxPlayer.current);
     }
-  
+
     const sequence = new Tone.Sequence((time, step) => {
       if (!mute.fx && fxData[step] !== 'empty') {
         playSound(fxPlayer.current, time, fxData[step] === 'heavy' ? fxVolume : fxVolume - 8);
@@ -74,21 +76,15 @@ const Sequencer = () => {
       if (!mute.hat && hatData[step] !== 'empty') {
         playSound(hatPlayer.current, time, hatData[step] === 'heavy' ? hatVolume : hatVolume - 8);
       }
-      if ([0, 4, 8, 12].includes(step)) {
-        scaleLogo();
-      }
       setCurrentStep(step);
     }, Array.from({ length: steps }, (_, i) => i), '16n').start(0);
-  
+
     Tone.Transport.bpm.value = bpm;
-  
+
     return () => {
       sequence.dispose();
     };
   }, [stepData, tomData, hatData, fxData, bpm, snareVolume, kickVolume, hatVolume, fxVolume, mute]);
-  
-  
-  
 
   useEffect(() => {
     const handleKeyPress = (event) => {
@@ -109,13 +105,26 @@ const Sequencer = () => {
           return newTapTimes;
         });
       } else if (event.key.toLowerCase() === 'j') {
-        toggleVelocity();      }
+        toggleVelocity();
+      }
     };
 
     window.addEventListener('keypress', handleKeyPress);
 
     return () => {
       window.removeEventListener('keypress', handleKeyPress);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mouseup', handleMouseUp);
     };
   }, []);
 
@@ -143,7 +152,7 @@ const Sequencer = () => {
       });
       return newData;
     };
-  
+
     if (row === 'snare') {
       setStepData((prev) => updateData(prev));
     } else if (row === 'tom') {
@@ -154,8 +163,6 @@ const Sequencer = () => {
       setFxData((prev) => updateData(prev));
     }
   };
-  
-  
 
   const playSound = (player, time, volume) => {
     console.log('Attempting to play sound at time', time);
@@ -193,8 +200,8 @@ const Sequencer = () => {
 
   const sanitizeBpmInput = (input) => {
     // Remove any non-numeric characters
-    let sanitizedInput = input.replace(/[^0-9]/g, ''); 
-  
+    let sanitizedInput = input.replace(/[^0-9]/g, '');
+
     // Ensure the sanitized input is within the valid range
     let parsedInput = parseInt(sanitizedInput, 10);
     if (isNaN(parsedInput) || parsedInput < 80) {
@@ -202,7 +209,7 @@ const Sequencer = () => {
     } else if (parsedInput > 200) {
       parsedInput = 200;
     }
-  
+
     return parsedInput;
   };
 
@@ -237,7 +244,7 @@ const Sequencer = () => {
 
   const handleBpmInputChange = (event) => {
     // Sanitize the input value immediately on change
-    const sanitizedValue = event.target.value.replace(/[^0-9]/g, ''); 
+    const sanitizedValue = event.target.value.replace(/[^0-9]/g, '');
     setBpm(sanitizedValue);
   };
 
@@ -271,6 +278,61 @@ const Sequencer = () => {
     setVelocityToggle((prev) => (prev === 'heavy' ? 'light' : 'heavy'));
   };
 
+  const handleMouseDown = (step, row) => {
+    setIsDragging(true);
+    const currentState = getStateForRow(row)[step];
+    const newToggleState = currentState === 'empty' ? velocityToggle : 'empty';
+    setDragToggle(newToggleState);
+    toggleStepWithState(step, row, newToggleState);
+  };
+
+  const handleMouseEnter = (step, row) => {
+    if (isDragging) {
+      toggleStepWithState(step, row, dragToggle);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const getStateForRow = (row) => {
+    switch (row) {
+      case 'snare':
+        return stepData;
+      case 'tom':
+        return tomData;
+      case 'hat':
+        return hatData;
+      case 'fx':
+        return fxData;
+      default:
+        return [];
+    }
+  };
+
+  const toggleStepWithState = (step, row, newState) => {
+    const updateData = (data) => {
+      const newData = data.map((s, stepIndex) => {
+        if (stepIndex === step) {
+          return newState;
+        }
+        return s;
+      });
+      return newData;
+    };
+
+    if (row === 'snare') {
+      setStepData((prev) => updateData(prev));
+    } else if (row === 'tom') {
+      setTomData((prev) => updateData(prev));
+    } else if (row === 'hat') {
+      setHatData((prev) => updateData(prev));
+    } else if (row === 'fx') {
+      setFxData((prev) => updateData(prev));
+    }
+  };
+
   const renderStepGroups = (data, row) => {
     const isMuted = mute[row];
     return (
@@ -287,7 +349,9 @@ const Sequencer = () => {
                 <div
                   key={globalIndex}
                   className={`step ${stepClass} ${currentStep === globalIndex ? 'current' : ''}`}
-                  onClick={() => toggleStep(globalIndex, row)}
+                  onMouseDown={() => handleMouseDown(globalIndex, row)}
+                  onMouseEnter={() => handleMouseEnter(globalIndex, row)}
+                  onMouseUp={handleMouseUp}
                 ></div>
               );
             })}
@@ -310,7 +374,7 @@ const Sequencer = () => {
         })}
       </div>
     ));
-  
+
     return <div className="dot-row">{groups}</div>;
   };
 
@@ -352,8 +416,7 @@ const Sequencer = () => {
       </div>
     );
   };
-  
-  
+
   return (
     <div>
       <a href="https://yuv1.com/" target="_blank" rel="noopener noreferrer">
@@ -382,10 +445,10 @@ const Sequencer = () => {
         <div className="control-button" onClick={stopSequencer}>
           <i className="fas fa-stop"></i>
         </div>
-        <button onClick={() => { 
-          setStepData(Array(steps).fill('empty')); 
-          setTomData(Array(steps).fill('empty')); 
-          setHatData(Array(steps).fill('empty')); 
+        <button onClick={() => {
+          setStepData(Array(steps).fill('empty'));
+          setTomData(Array(steps).fill('empty'));
+          setHatData(Array(steps).fill('empty'));
           setFxData(Array(steps).fill('empty'));
           setMute({ snare: false, tom: false, hat: false, fx: false }); // Reset mute state
         }}>clear</button>
@@ -416,8 +479,8 @@ const Sequencer = () => {
         <label>(tap =k)</label>
         <span className="tap-value">{tapBpm !== null ? tapBpm : '???'}</span>
       </div>
-      <div 
-        className="velocity-toggle-indicator" 
+      <div
+        className="velocity-toggle-indicator"
         style={{ backgroundColor: velocityToggle === 'heavy' ? '#555' : '#aaa', width: '30px', height: '30px', margin: '10px auto', border: '1px solid #aaa', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}
         onClick={toggleVelocity}
       >
@@ -425,7 +488,6 @@ const Sequencer = () => {
       </div>
     </div>
   );
-  
 };
 
 export default Sequencer;
