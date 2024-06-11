@@ -33,6 +33,8 @@ const Sequencer = () => {
   const [audioStarted, setAudioStarted] = useState(false);
   const [showOverlay, setShowOverlay] = useState(true);
 
+  const silentAudioRef = useRef(null);
+
   useEffect(() => {
     if (snarePlayer.current === null) {
       const player = new Tone.Player('/snap.mp3').toDestination();
@@ -189,18 +191,26 @@ const Sequencer = () => {
   };
 
   const startSequencer = () => {
-    if (Tone.context.state !== 'running') {
-      Tone.context.resume().then(() => {
-        Tone.Transport.start();
-        setAudioStarted(true);
-        setShowOverlay(false);
+    const silentAudio = silentAudioRef.current;
+    if (silentAudio) {
+      silentAudio.play().then(() => {
+        console.log('Silent audio played');
+        if (Tone.context.state !== 'running') {
+          Tone.context.resume().then(() => {
+            Tone.Transport.start();
+            setAudioStarted(true);
+            setShowOverlay(false); // Hide the overlay
+          }).catch((error) => {
+            console.error('Error resuming audio context:', error);
+          });
+        } else {
+          Tone.Transport.start();
+          setAudioStarted(true);
+          setShowOverlay(false); // Hide the overlay
+        }
       }).catch((error) => {
-        console.error('Error resuming audio context:', error);
+        console.error('Error playing silent audio:', error);
       });
-    } else {
-      Tone.Transport.start();
-      setAudioStarted(true);
-      setShowOverlay(false);
     }
   };
 
@@ -296,7 +306,7 @@ const Sequencer = () => {
     setDragToggle(newToggleState);
     toggleStepWithState(step, row, newToggleState);
   };
-  
+
   const handleMouseEnter = (step, row) => {
     if (isDragging && !mute[row]) {
       toggleStepWithState(step, row, dragToggle);
@@ -343,28 +353,6 @@ const Sequencer = () => {
       setFxData((prev) => updateData(prev));
     }
   };
-
-  useEffect(() => {
-    const handleUserInteraction = () => {
-      if (Tone.context.state !== 'running') {
-        Tone.context.resume().then(() => {
-          console.log('Audio context resumed from user interaction');
-          setShowOverlay(false);
-        }).catch((error) => {
-          console.error('Error resuming audio context from user interaction:', error);
-        });
-      }
-    };
-  
-    document.addEventListener('click', handleUserInteraction);
-    document.addEventListener('touchstart', handleUserInteraction);
-  
-    return () => {
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
-    };
-  }, []);
-  
 
   const renderStepGroups = (data, row) => {
     const isMuted = mute[row];
@@ -459,6 +447,9 @@ const Sequencer = () => {
           </div>
         </div>
       )}
+      <audio ref={silentAudioRef}>
+        <source src="/silent.mp3" type="audio/mp3" />
+      </audio>
       <a href="https://yuv1.com/" target="_blank" rel="noopener noreferrer">
         <img src="/yuvdaw.png" alt="yuvdaw" className="custom-logo" />
       </a>
@@ -528,7 +519,6 @@ const Sequencer = () => {
       </div>
     </div>
   );
-  
 };
 
 export default Sequencer;
