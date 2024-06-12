@@ -1,10 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as Tone from 'tone';
-import './Sequencer.css';
+import Track from './Track';
+import Controls from './Controls';
+import VolumeDials from './VolumeDials';
+import Overlay from './Overlay';
+import BPMControl from './BPMControl';
+import { initializePlayers, playSound } from '../../utils/audioUtils';
+import { constrainBpm, sanitizeBpmInput } from '../../utils/bpmUtils';
+import { resetTapBpm, resetTapTimeout } from '../../utils/tapBpmUtils';
+import useAudioContext from '../../hooks/useAudioContext';
 
 const Sequencer = () => {
-  const steps = 32; // Change to 32 steps
-  const voices = 4; // Number of overlapping voices
+  const steps = 32;
+  const voices = 4;
   const [stepData, setStepData] = useState(Array(steps).fill('empty'));
   const [tomData, setTomData] = useState(Array(steps).fill('empty'));
   const [hatData, setHatData] = useState(Array(steps).fill('empty'));
@@ -73,38 +81,21 @@ const Sequencer = () => {
         fx: { label: "crash", file: "/pluggcrash.mp3" },
       },
     },
-    // Add more kits as needed
   ];
 
   const [currentKit, setCurrentKit] = useState(0);
 
+  useAudioContext();
+
   useEffect(() => {
     const kit = drumKits[currentKit].tracks;
+    const volumes = { snare: snareVolume, tom: kickVolume, hat: hatVolume, fx: fxVolume };
 
-    snarePlayers.current = Array.from({ length: voices }, () => new Tone.Player(kit.snare.file).toDestination());
-    tomPlayers.current = Array.from({ length: voices }, () => new Tone.Player(kit.tom.file).toDestination());
-    hatPlayers.current = Array.from({ length: voices }, () => new Tone.Player(kit.hat.file).toDestination());
-    fxPlayers.current = Array.from({ length: voices }, () => new Tone.Player(kit.fx.file).toDestination());
-
-    snarePlayers.current.forEach(player => {
-      player.volume.value = snareVolume;
-      player.autostart = false;
-    });
-
-    tomPlayers.current.forEach(player => {
-      player.volume.value = kickVolume;
-      player.autostart = false;
-    });
-
-    hatPlayers.current.forEach(player => {
-      player.volume.value = hatVolume;
-      player.autostart = false;
-    });
-
-    fxPlayers.current.forEach(player => {
-      player.volume.value = fxVolume;
-      player.autostart = false;
-    });
+    const players = initializePlayers(kit, voices, volumes);
+    snarePlayers.current = players.snare;
+    tomPlayers.current = players.tom;
+    hatPlayers.current = players.hat;
+    fxPlayers.current = players.fx;
   }, [currentKit, snareVolume, kickVolume, hatVolume, fxVolume]);
 
   useEffect(() => {
@@ -315,9 +306,16 @@ const Sequencer = () => {
   };
 
   const handleBpmInputChange = (event) => {
-    const sanitizedValue = event.target.value.replace(/[^0-9]/g, '');
+    // Only allow numeric values and limit the length to 3 digits
+    let sanitizedValue = event.target.value.replace(/[^0-9]/g, '');
+    if (sanitizedValue.length > 3) {
+      sanitizedValue = sanitizedValue.slice(0, 3);
+    }
     setBpm(sanitizedValue);
   };
+  
+  
+  
 
   const handleBpmInputBlur = (event) => {
     const newBpm = sanitizeBpmInput(event.target.value);
@@ -438,17 +436,19 @@ const Sequencer = () => {
       <div className="dot-group" key={groupIndex}>
         {Array.from({ length: 4 }, (_, index) => {
           const globalIndex = groupIndex * 4 + index;
+          const isRedDot = groupIndex % 2 === 0 && index === 0;
           return (
             <div key={globalIndex} className="dot-container">
-              <div className={`dot ${currentStep === globalIndex ? 'current' : ''}`}></div>
+              <div className={`dot ${currentStep === globalIndex ? 'current' : ''} ${isRedDot ? 'red' : ''}`}></div>
             </div>
           );
         })}
       </div>
     ));
-
+    
     return <div className="dot-row">{groups}</div>;
   };
+  
 
   const renderVolumeDials = () => {
     return (
@@ -491,18 +491,35 @@ const Sequencer = () => {
 
   const previousKit = () => {
     setCurrentKit((prev) => (prev > 0 ? prev - 1 : drumKits.length - 1));
+    triggerConfetti();
   };
 
   const nextKit = () => {
     setCurrentKit((prev) => (prev < drumKits.length - 1 ? prev + 1 : 0));
+    triggerConfetti();
   };
+
+  function randomInRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  //origin: { y: 0.32, x: 0.104 }
+  
+  function triggerConfetti() {
+    confetti({
+      angle: randomInRange(55, 125),
+      spread: randomInRange(80, 130),
+      particleCount: randomInRange(50, 100),
+      origin: { y: 0.32, x: 0.104 },
+    });
+  }
 
   return (
     <div>
       {showOverlay && (
         <div className="overlay" onClick={startSequencer}>
           <div className="overlay-content">
-            <p>interact 2 start</p>
+            <p>click/tap</p>
           </div>
         </div>
       )}
@@ -510,7 +527,6 @@ const Sequencer = () => {
         <source src="/silent.mp3" type="audio/mp3" />
       </audio>
       <a >
-
         <img src="/yuvdaw.png" alt="yuvdaw" className="custom-logo" />
         </a>
       <div className="main-container">
@@ -565,6 +581,7 @@ const Sequencer = () => {
     setFxData(Array(steps).fill('empty'));
     setMute({ snare: false, tom: false, hat: false, fx: false });
   }}>clear all</button>
+    <label>&nbsp;b toggles velocity</label>
 </div>
 
 
@@ -579,7 +596,7 @@ const Sequencer = () => {
           onChange={handleBpmChange}
         />
         <input
-          type="number"
+          type="text"
           min="80"
           max="200"
           value={bpm}
