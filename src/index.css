@@ -11,7 +11,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: #ffffff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -37,8 +37,8 @@ body {
   font-family: monospace;
   text-align: center;
   user-select: none;
-  overflow: hidden; /* Prevent unwanted scrolling */
-
+  overflow: hidden;
+  background-color: #ffffff;
 }
 
 h1 {
@@ -84,12 +84,12 @@ button:focus-visible {
 /* Sequencer-specific styles */
 .label.muted {
   text-decoration: line-through;
-  text-decoration-thickness: 2px; /* Adjust the thickness as desi  */
+  text-decoration-thickness: 2px;
 }
 
 .velocity-toggle-indicator {
-  cursor: pointer; /* Add pointer cursor */
-  user-select: none; /* Disable text selection */
+  cursor: pointer;
+  user-select: none;
 }
 
 .custom-logo {
@@ -107,20 +107,24 @@ button:focus-visible {
   cursor: pointer;
 }
 
-.main-container { /* Container for both label and sequencer */
+.main-container {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
   padding: 10px;
   border-radius: 8px;
+  width: 100%;
+  max-width: 1920px;
+  margin: 0 auto;
 }
 
-.label-container { /* Moved outside of sequencer-container */
+.label-container {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: space-between;
   margin-top: 24px;
+  margin-right: 10px;
 }
 
 .label-container .label {
@@ -132,20 +136,24 @@ button:focus-visible {
   padding-right: 10px;
   text-align: right;
   margin-top: 14px;
-  cursor: pointer; /* Change cursor to default */
+  cursor: pointer;
+  color: #000000;
 }
 
 .sequencer-container {
   display: flex;
   flex-direction: column;
-  align-items: left ;
-  background-color: #f0f0f0; /* Light gray background for sequencer container */
+  align-items: flex-start;
+  background-color: #f0f0f0;
   padding: 10px;
   border-radius: 8px;
-  width: 1130px; /* Adjust width */
+  width: calc(100% - 20px);
+  max-width: 1600px;
+  overflow-x: auto;
+  border: 1px solid #aaa;
 }
 
-.volume-container { /* Container for volume dials */
+.volume-container {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -154,17 +162,17 @@ button:focus-visible {
   padding-right: 12px;
 }
 
-.volume-dial { /* Style for volume dials */
+.volume-dial {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  writing-mode: vertical-lr; /* Writing mode for vertical slider */
-  direction: rtl; /* Direction for vertical slider */
-  width: 3px; /* Adjust width as needed */
-  height: 30px; /* Adjust height as needed */
-  background: black; /* Set background color to black */
-  margin-top: 14px; /* Add right padding */
-  border-radius: 5px; /* Optional: Add border radius for rounded edges */
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 3px;
+  height: 30px;
+  background: black;
+  margin-top: 14px;
+  border-radius: 5px;
 }
 
 .volume-dial::-webkit-slider-thumb {
@@ -188,7 +196,7 @@ button:focus-visible {
 }
 
 .step.heavy {
-  background-color: #555; /* Heavy note color */
+  background-color: #555;
 }
 
 .step.empty {
@@ -196,7 +204,7 @@ button:focus-visible {
 }
 
 .step.light {
-  background-color: #aaa; /* Light note color */
+  background-color: #aaa;
 }
 
 .step.current {
@@ -213,15 +221,15 @@ button:focus-visible {
   );
   background-size: 10px 10px;
   position: relative;
-  cursor: default; /* Change cursor to default */
+  cursor: default;
 }
 
 .sequencer {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   margin-bottom: 10px;
-  width: calc(100% - 10px); /* Adjust the width to match the dot-row */
-  margin-left: 5px; /* Center it within the container */
+  width: max-content;
+  min-width: 100%;
 }
 
 .step {
@@ -231,9 +239,9 @@ button:focus-visible {
   background-color: #ddd;
   border: 1px solid #aaa;
   display: inline-block;
-  cursor: pointer; /* Change cursor to crosshair on hover */
-  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3); /* Add this line */
-
+  cursor: pointer;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
 }
 
 .group {
@@ -246,24 +254,28 @@ button:focus-visible {
 
 .dot-row {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   margin-bottom: 10px;
-  width: calc(100% - 10px); /* Adjust the width to match the sequencer */
-  margin-right: 47px; /* Center it within the container */  
+  width: max-content;
+  min-width: 100%;
 }
 
 .dot-container {
-  width: 28px; /* Match step width */
+  width: 28px;
   height: 10px;
-  margin: 2px; /* Match step margin */
+  margin: 2px;
   border: 1px solid transparent;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .dot-group {
   display: flex;
   justify-content: center;
-  margin-left: 10px; /* Match the margin-left of the .group */
+}
+
+.dot-group + .dot-group {
+  margin-left: 10px;
 }
 
 .dot {
@@ -273,8 +285,7 @@ button:focus-visible {
   border: 1px solid #aaa;
   border-radius: 50%;
   margin: auto;
-  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2); /* Add this line */
-
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
 }
 
 .dot.red {
@@ -289,17 +300,22 @@ button:focus-visible {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-right: 710px;
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .control-button {
   margin-right: 20px;
   cursor: pointer;
+  color: #000000;
+  font-size: 24px;
 }
 
 .control-button2 {
   margin-right: 15px;
   cursor: pointer;
+  color: #000000;
 }
 
 .control-button i {
@@ -320,15 +336,15 @@ button:focus-visible {
 .bpm-control label,
 .bpm-control span {
   margin: 0 5px;
-  min-width: 30px; /* Fixed width to avoid shifting */
-  text-align: center; /* Center the text */
+  min-width: 30px;
+  text-align: center;
 }
 
 .bpm-control input[type="range"] {
   margin: 0 10px;
-  width: 200px; /* Adjust the width as needed */
-  -webkit-appearance: none; /* Remove default styling */
-  appearance: none; /* Remove default styling */
+  width: 200px;
+  -webkit-appearance: none;
+  appearance: none;
   background: #5804ac;
   height: 8px;
   border-radius: 5px;
@@ -355,7 +371,7 @@ button:focus-visible {
   cursor: pointer;
 }
 
-.bpm-input { /* Style for bpm input field */
+.bpm-input {
   width: 60px;
   margin-left: 10px;
   font-family: monospace;
@@ -379,12 +395,12 @@ button:focus-visible {
   margin: 0 5px;
   width: 110px;
   text-align: left;
-  cursor: default; /* Change cursor to default */
+  cursor: default;
 }
 
 .tap-bpm .tap-value {
   color: #000000;
-  cursor: default; /* Change cursor to default */
+  cursor: default;
 }
 
 .tap-bpm button {
@@ -419,19 +435,19 @@ button:focus-visible {
   align-items: center;
   justify-content: space-between;
   position: absolute;
-  width: 115px; /* Adjust the width as necessary */
-  margin: 0 auto; /* Center the bank selector within its parent container */
+  width: 115px;
+  margin: 0 auto;
   left: 75px;
   top: 202px;
 }
 
 .bank-selector button {
-  width: 15px; /* Fixed width for buttons */
+  width: 15px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f0f0f0; /* Light gray background for sequencer container */
+  background-color: #f0f0f0;
 }
 
 .kit-name {
@@ -439,44 +455,17 @@ button:focus-visible {
   left: 50%;
   transform: translateX(-50%);
   font-weight: bold;
-  pointer-events: none; /* Prevent interactions from affecting position */
+  pointer-events: none;
+  color: #000000;
 }
 
+/* Media query for 1920x1080 screens */
+@media screen and (min-width: 1920px) {
+  .main-container {
+    max-width: 1920px;
+  }
 
-$d: 4px;
-
-html { overflow: hidden; background: #222; }
-
-.particle {
-	position: absolute;
-	width: $d; height: $d;
-	animation: shoot 3s ease-out infinite;
-	animation-name: shoot, fade;
-	
-	@for $i from 0 to 400 {
-		$t: (1 + .01*random(100))*1s;
-		
-		&:nth-child(#{$i + 1}) {
-			transform: translate(random(100)*1vw, 
-													 random(100)*1vh);
-			background: hsl(random(360), 100%, 65%);
-			animation-duration: $t;
-			animation-delay: -.01*random(100)*$t;
-		}
-	}
+  .sequencer-container {
+    max-width: 1800px;
+  }
 }
-
-@keyframes shoot {
-	0% { transform: translate(50vw, 50vh); }
-}
-@keyframes fade { to { opacity: 0 } }
-
-.particle.shoot-fast {
-	animation: shoot-fast 200ms ease-out forwards, fade-fast 200ms ease-out forwards;
-}
-
-@keyframes shoot-fast {
-	0% { transform: translate(50vw, 50vh); }
-	to { transform: translate(50vw, 50vh); } /* Change this according to your needs */
-}
-@keyframes fade-fast { to { opacity: 0 } }
