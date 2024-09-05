@@ -147,9 +147,8 @@ button:focus-visible {
   background-color: #f0f0f0;
   padding: 10px;
   border-radius: 8px;
-  width: calc(100% - 20px);
-  max-width: 1600px;
-  overflow-x: auto;
+  width: fit-content;
+  overflow: hidden;
   border: 1px solid #aaa;
 }
 
@@ -228,8 +227,6 @@ button:focus-visible {
   display: flex;
   justify-content: flex-start;
   margin-bottom: 10px;
-  width: max-content;
-  min-width: 100%;
 }
 
 .step {
@@ -256,8 +253,6 @@ button:focus-visible {
   display: flex;
   justify-content: flex-start;
   margin-bottom: 10px;
-  width: max-content;
-  min-width: 100%;
 }
 
 .dot-container {
